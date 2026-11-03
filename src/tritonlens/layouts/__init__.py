@@ -6,6 +6,7 @@ from ..ir.attrs import Encoding
 from .base import DistributedLayout, OwnershipMap
 from .blocked import BlockedLayout
 from .mma import DotOperandLayout, MmaV2Layout
+from .shared import PaddedScratchLayout, SharedLayout
 from .slice import SliceLayout
 
 
@@ -32,8 +33,11 @@ def from_encoding(enc: Encoding, num_warps: int = 4, threads_per_warp: int = 32)
         if not isinstance(parent, MmaV2Layout):
             raise UnsupportedLayout("dot_op operands are modelled only for MMA v2 parents")
         return DotOperandLayout(int(params["opIdx"]), parent, int(params.get("kWidth", 2)))
+    if kind == "shared":
+        return SharedLayout.from_params(params)
     raise UnsupportedLayout(f"layout kind {kind!r} is not modelled")
 
 
 __all__ = ["BlockedLayout", "DistributedLayout", "DotOperandLayout", "MmaV2Layout",
-           "OwnershipMap", "SliceLayout", "UnsupportedLayout", "from_encoding"]
+           "OwnershipMap", "PaddedScratchLayout", "SharedLayout", "SliceLayout",
+           "UnsupportedLayout", "from_encoding"]
