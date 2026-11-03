@@ -1,0 +1,105 @@
+{
+  "name": "softmax_kernel",
+  "hash": "214f8ac322fc73349163051e96401c6841c919faac81f0d54aca31edec51a198",
+  "metadata": {
+    "num_warps": 4,
+    "num_stages": 3,
+    "num_ctas": 1,
+    "shared": 16,
+    "target": {
+      "backend": "cuda",
+      "arch": 86,
+      "warp_size": 32
+    },
+    "name": "softmax_kernel",
+    "debug": false,
+    "n_regs": 29,
+    "n_spills": 0
+  },
+  "grid": [
+    1823,
+    1,
+    1
+  ],
+  "args": [
+    {
+      "name": "out_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float32",
+      "shape": [
+        1823,
+        781
+      ],
+      "strides": [
+        781,
+        1
+      ],
+      "data_ptr": 81749082112,
+      "element_size": 4,
+      "contiguous": true
+    },
+    {
+      "name": "in_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float32",
+      "shape": [
+        1823,
+        781
+      ],
+      "strides": [
+        781,
+        1
+      ],
+      "data_ptr": 81635835904,
+      "element_size": 4,
+      "contiguous": true
+    },
+    {
+      "name": "in_row_stride",
+      "kind": "int",
+      "value": 781,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "out_row_stride",
+      "kind": "int",
+      "value": 781,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "n_cols",
+      "kind": "int",
+      "value": 781,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "BLOCK_SIZE",
+      "kind": "constexpr",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    }
+  ],
+  "launches": 1
+}

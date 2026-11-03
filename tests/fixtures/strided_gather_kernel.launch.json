@@ -1,0 +1,90 @@
+{
+  "name": "strided_gather_kernel",
+  "hash": "b34c1edaaeedf33008a13b2eae3b361b8a90efcaaadd38665751d6071755525d",
+  "metadata": {
+    "num_warps": 4,
+    "num_stages": 3,
+    "num_ctas": 1,
+    "shared": 0,
+    "target": {
+      "backend": "cuda",
+      "arch": 86,
+      "warp_size": 32
+    },
+    "name": "strided_gather_kernel",
+    "debug": false,
+    "n_regs": 30,
+    "n_spills": 0
+  },
+  "grid": [
+    1024,
+    1,
+    1
+  ],
+  "args": [
+    {
+      "name": "x_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float32",
+      "shape": [
+        8388613
+      ],
+      "strides": [
+        1
+      ],
+      "data_ptr": 81791025152,
+      "element_size": 4,
+      "contiguous": true
+    },
+    {
+      "name": "out_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float32",
+      "shape": [
+        1048576
+      ],
+      "strides": [
+        1
+      ],
+      "data_ptr": 81879106048,
+      "element_size": 4,
+      "contiguous": true
+    },
+    {
+      "name": "n",
+      "kind": "int",
+      "value": 1048576,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "stride",
+      "kind": "int",
+      "value": 8,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "BLOCK",
+      "kind": "constexpr",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    }
+  ],
+  "launches": 1
+}

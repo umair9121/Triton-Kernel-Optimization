@@ -1,0 +1,135 @@
+{
+  "name": "layernorm_kernel",
+  "hash": "603cfe95508005563ba684d3dcbe5a627f80bff3097ad7fb1650980b7cc8ab40",
+  "metadata": {
+    "num_warps": 8,
+    "num_stages": 3,
+    "num_ctas": 1,
+    "shared": 32,
+    "target": {
+      "backend": "cuda",
+      "arch": 86,
+      "warp_size": 32
+    },
+    "name": "layernorm_kernel",
+    "debug": false,
+    "n_regs": 34,
+    "n_spills": 0
+  },
+  "grid": [
+    1151,
+    1,
+    1
+  ],
+  "args": [
+    {
+      "name": "x_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float16",
+      "shape": [
+        1151,
+        8192
+      ],
+      "strides": [
+        8192,
+        1
+      ],
+      "data_ptr": 81749082112,
+      "element_size": 2,
+      "contiguous": true
+    },
+    {
+      "name": "y_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float16",
+      "shape": [
+        1151,
+        8192
+      ],
+      "strides": [
+        8192,
+        1
+      ],
+      "data_ptr": 81791025152,
+      "element_size": 2,
+      "contiguous": true
+    },
+    {
+      "name": "w_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float16",
+      "shape": [
+        8192
+      ],
+      "strides": [
+        1
+      ],
+      "data_ptr": 81633738752,
+      "element_size": 2,
+      "contiguous": true
+    },
+    {
+      "name": "b_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float16",
+      "shape": [
+        8192
+      ],
+      "strides": [
+        1
+      ],
+      "data_ptr": 81633755136,
+      "element_size": 2,
+      "contiguous": true
+    },
+    {
+      "name": "stride",
+      "kind": "int",
+      "value": 8192,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "N",
+      "kind": "int",
+      "value": 8192,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "eps",
+      "kind": "float",
+      "value": 1e-05,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "BLOCK_SIZE",
+      "kind": "constexpr",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    }
+  ],
+  "launches": 1
+}

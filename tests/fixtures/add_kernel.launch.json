@@ -1,0 +1,94 @@
+{
+  "name": "add_kernel",
+  "hash": "14afc44ff3fcfa2a280704a8ee6a432384a3cb8b3ed66cd75572e5ec74c4aeff",
+  "metadata": {
+    "num_warps": 4,
+    "num_stages": 3,
+    "num_ctas": 1,
+    "shared": 0,
+    "target": {
+      "backend": "cuda",
+      "arch": 86,
+      "warp_size": 32
+    },
+    "name": "add_kernel",
+    "debug": false,
+    "n_regs": 26,
+    "n_spills": 0
+  },
+  "grid": [
+    97,
+    1,
+    1
+  ],
+  "args": [
+    {
+      "name": "x_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float32",
+      "shape": [
+        98432
+      ],
+      "strides": [
+        1
+      ],
+      "data_ptr": 81684070400,
+      "element_size": 4,
+      "contiguous": true
+    },
+    {
+      "name": "y_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float32",
+      "shape": [
+        98432
+      ],
+      "strides": [
+        1
+      ],
+      "data_ptr": 81684464128,
+      "element_size": 4,
+      "contiguous": true
+    },
+    {
+      "name": "out_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float32",
+      "shape": [
+        98432
+      ],
+      "strides": [
+        1
+      ],
+      "data_ptr": 81684857856,
+      "element_size": 4,
+      "contiguous": true
+    },
+    {
+      "name": "n_elements",
+      "kind": "int",
+      "value": 98432,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "BLOCK_SIZE",
+      "kind": "constexpr",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    }
+  ],
+  "launches": 1
+}

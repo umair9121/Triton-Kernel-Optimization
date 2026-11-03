@@ -1,0 +1,221 @@
+{
+  "name": "matmul_kernel",
+  "hash": "7468ae6e373701317cdc451a839fe1d97074bff0f3367fa1ce0e78bc8753d81f",
+  "metadata": {
+    "num_warps": 4,
+    "num_stages": 3,
+    "num_ctas": 1,
+    "shared": 16384,
+    "target": {
+      "backend": "cuda",
+      "arch": 86,
+      "warp_size": 32
+    },
+    "name": "matmul_kernel",
+    "debug": false,
+    "n_regs": 96,
+    "n_spills": 0
+  },
+  "grid": [
+    256,
+    1,
+    1
+  ],
+  "args": [
+    {
+      "name": "a_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float16",
+      "shape": [
+        1024,
+        1024
+      ],
+      "strides": [
+        1024,
+        1
+      ],
+      "data_ptr": 81635835904,
+      "element_size": 2,
+      "contiguous": true
+    },
+    {
+      "name": "b_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float16",
+      "shape": [
+        1024,
+        1024
+      ],
+      "strides": [
+        1024,
+        1
+      ],
+      "data_ptr": 81637933056,
+      "element_size": 2,
+      "contiguous": true
+    },
+    {
+      "name": "c_ptr",
+      "kind": "tensor",
+      "value": null,
+      "dtype": "float16",
+      "shape": [
+        1024,
+        1024
+      ],
+      "strides": [
+        1024,
+        1
+      ],
+      "data_ptr": 81640030208,
+      "element_size": 2,
+      "contiguous": true
+    },
+    {
+      "name": "M",
+      "kind": "int",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "N",
+      "kind": "int",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "K",
+      "kind": "int",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "stride_am",
+      "kind": "int",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "stride_ak",
+      "kind": "int",
+      "value": 1,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "stride_bk",
+      "kind": "int",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "stride_bn",
+      "kind": "int",
+      "value": 1,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "stride_cm",
+      "kind": "int",
+      "value": 1024,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "stride_cn",
+      "kind": "int",
+      "value": 1,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "BLOCK_M",
+      "kind": "constexpr",
+      "value": 64,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "BLOCK_N",
+      "kind": "constexpr",
+      "value": 64,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "BLOCK_K",
+      "kind": "constexpr",
+      "value": 32,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    },
+    {
+      "name": "GROUP_M",
+      "kind": "constexpr",
+      "value": 8,
+      "dtype": null,
+      "shape": null,
+      "strides": null,
+      "data_ptr": null,
+      "element_size": null,
+      "contiguous": null
+    }
+  ],
+  "launches": 1
+}
