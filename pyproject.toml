@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tritonlens"
+version = "0.1.0"
+description = "Static analysis and interactive visualization of Triton GPU kernel memory layouts"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [{ name = "umair9121" }]
+keywords = ["triton", "gpu", "cuda", "mlir", "static-analysis", "visualization"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = []
+
+[project.optional-dependencies]
+gpu = ["torch>=2.1", "triton>=3.0; platform_system != 'Windows'", "triton-windows>=3.2; platform_system == 'Windows'"]
+dev = ["pytest>=7", "ruff>=0.4"]
+
+[project.scripts]
+tritonlens = "tritonlens.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tritonlens = ["report/assets/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["gpu: requires a CUDA GPU and Triton"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E741"]
