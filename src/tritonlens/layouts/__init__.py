@@ -5,6 +5,8 @@ from __future__ import annotations
 from ..ir.attrs import Encoding
 from .base import DistributedLayout, OwnershipMap
 from .blocked import BlockedLayout
+from .mma import DotOperandLayout, MmaV2Layout
+from .slice import SliceLayout
 
 
 class UnsupportedLayout(ValueError):
@@ -17,8 +19,21 @@ def from_encoding(enc: Encoding, num_warps: int = 4, threads_per_warp: int = 32)
     params = enc.params
     if kind == "blocked":
         return BlockedLayout.from_params(params)
+    if kind == "slice":
+        parent = params["parent"]
+        return SliceLayout(int(params["dim"]), from_encoding(parent, num_warps, threads_per_warp))
+    if kind == "nvidia_mma":
+        try:
+            return MmaV2Layout.from_params(params)
+        except ValueError as exc:
+            raise UnsupportedLayout(str(exc)) from exc
+    if kind == "dot_op":
+        parent = from_encoding(params["parent"], num_warps, threads_per_warp)
+        if not isinstance(parent, MmaV2Layout):
+            raise UnsupportedLayout("dot_op operands are modelled only for MMA v2 parents")
+        return DotOperandLayout(int(params["opIdx"]), parent, int(params.get("kWidth", 2)))
     raise UnsupportedLayout(f"layout kind {kind!r} is not modelled")
 
 
-__all__ = ["BlockedLayout", "DistributedLayout", "OwnershipMap", "UnsupportedLayout",
-           "from_encoding"]
+__all__ = ["BlockedLayout", "DistributedLayout", "DotOperandLayout", "MmaV2Layout",
+           "OwnershipMap", "SliceLayout", "UnsupportedLayout", "from_encoding"]
