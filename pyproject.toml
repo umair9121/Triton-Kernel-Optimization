@@ -38,6 +38,12 @@ markers = ["gpu: requires a CUDA GPU and Triton"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+src = ["src", "examples"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["tritonlens", "bad_access", "layernorm", "matmul", "softmax", "transpose",
+                     "vector_add"]
+known-third-party = ["torch", "triton"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]

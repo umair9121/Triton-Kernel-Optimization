@@ -54,7 +54,6 @@ def test_live_check_and_guard():
 
     sys.path.insert(0, str(Path(__file__).parents[1] / "examples"))
     import bad_access
-
     from tritonlens.analysis.runtime_check import check, guard
 
     base = torch.randn(3, 4097, device="cuda")
