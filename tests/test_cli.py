@@ -7,10 +7,11 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def test_lint_text_min_severity(capsys):
-    assert main(["lint", str(FIXTURES / "softmax_kernel.ttgir"), "--min-severity", "warning"]) == 0
+    target = str(FIXTURES / "misaligned_add_kernel.ttgir")
+    assert main(["lint", target, "--min-severity", "warning"]) == 0
     out = capsys.readouterr().out
-    assert "TL001" in out
-    assert "TL006" not in out and "TL005" not in out
+    assert "TL006" in out
+    assert "TL001" not in out
 
 
 def test_lint_fail_on(tmp_path):

@@ -190,10 +190,17 @@ def rule_tl001(an: Analysis) -> list[Finding]:
                          "num_warps")
         if not reasons:
             continue
-        severity = "warning" if "layout" not in binding or len(binding) > 1 else "info"
+        # Narrow but fully coalesced accesses cost load/store issue slots, not DRAM bandwidth:
+        # on a DRAM-bound kernel the difference measured below 2% (benchmarks/lint_fixes.py).
+        coalesced = acc.efficiency >= 0.9
+        severity = "info" if coalesced else "warning"
         msg = (f"{_what(acc).capitalize()} uses {acc.vec_bytes}-byte accesses per lane; "
                f"{acc.potential_vec * acc.elem_bytes}-byte vectors are possible. Limited by: "
                + "; ".join(reasons) + "." + _ptx_note(acc))
+        if coalesced:
+            msg += (f" Sectors are still fully used, so this costs "
+                    f"{acc.potential_vec // max(acc.vec, 1)}x more memory instructions rather "
+                    "than bandwidth; it matters when the kernel is issue-bound or L2-resident.")
         out.append(Finding("TL001", severity, msg, acc.op, "; ".join(dict.fromkeys(fixes)),
                            {"vecBytes": acc.vec_bytes,
                             "potentialBytes": acc.potential_vec * acc.elem_bytes,

@@ -58,9 +58,12 @@ def test_clean_kernels_have_no_warnings():
 def test_tl001_misaligned_pointer_and_mask():
     findings = rules(run_lint(analysis("misaligned_add_kernel")), "TL001")
     assert len(findings) == 3
-    msg = findings[0].message
-    assert "`x_ptr`" in msg and "not known to be 16-byte aligned" in msg
+    msg = next(f.message for f in findings if "`x_ptr`" in f.message)
+    assert "not known to be 16-byte aligned" in msg
     assert "`n`" in msg and "PTX confirms: ld.global.b32" in msg
+    # Fully coalesced: narrow accesses cost instructions, not bandwidth.
+    assert all(f.severity == "info" for f in findings)
+    assert "4x more memory instructions" in msg
 
 
 def test_tl001_names_the_unaligned_row_stride():
