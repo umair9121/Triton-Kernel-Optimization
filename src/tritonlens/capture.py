@@ -69,6 +69,32 @@ class CapturedKernel:
         return target
 
     @classmethod
+    def from_files(cls, ttgir: str | Path, ptx: str | Path | None = None,
+                   launch: str | Path | None = None) -> CapturedKernel:
+        """Build a kernel from loose files: a ``.ttgir`` plus optional PTX and launch JSON.
+
+        Missing companions are looked up next to the TTGIR as ``<stem>.ptx`` and
+        ``<stem>.launch.json``.
+        """
+        ttgir = Path(ttgir)
+        stem = ttgir.with_suffix("")
+        ptx = Path(ptx) if ptx else stem.with_suffix(".ptx")
+        launch = Path(launch) if launch else Path(f"{stem}.launch.json")
+        ir = {"ttgir": ttgir.read_text(encoding="utf-8")}
+        if ptx.exists():
+            ir["ptx"] = ptx.read_text(encoding="utf-8")
+        info = json.loads(launch.read_text(encoding="utf-8")) if launch.exists() else {}
+        return cls(
+            name=info.get("name", ttgir.stem),
+            hash=info.get("hash", ""),
+            ir=ir,
+            metadata=info.get("metadata", {}),
+            grid=info.get("grid"),
+            args=[ArgInfo(**a) for a in info.get("args", [])],
+            launches=info.get("launches", 1),
+        )
+
+    @classmethod
     def load(cls, path: str | Path) -> CapturedKernel:
         """Load a kernel saved with :meth:`save` (``path`` is the kernel directory)."""
         path = Path(path)

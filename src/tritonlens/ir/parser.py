@@ -505,6 +505,8 @@ class _FuncBuilder:
             return self._types(type_part[to + 4:])
         types = self._types(type_part)
         op.operand_types = types
+        if op.is_("addptr") and types:
+            return types[:1]
         if op.is_("load") and types and isinstance(types[0], TensorType):
             ptr = types[0]
             elem = ptr.element.pointee if isinstance(ptr.element, PointerType) else ptr.element
