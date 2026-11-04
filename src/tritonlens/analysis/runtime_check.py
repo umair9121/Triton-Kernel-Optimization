@@ -60,6 +60,37 @@ def check_args(args: list[ArgInfo], kernel_name: str = "kernel") -> list[Finding
     return findings
 
 
+def check_memory(args: list[ArgInfo], kernel_name: str = "kernel") -> list[Finding]:
+    """VRAM headroom for live arguments (TL010), skipped when no GPU is visible."""
+    from ..device import detect
+    from .budget import fmt_bytes, tensor_footprint
+
+    spec = detect()
+    if spec is None or not spec.total_memory:
+        return []
+    used, _ = tensor_footprint(args)
+    if not used:
+        return []
+    try:
+        import torch
+
+        free, total = torch.cuda.mem_get_info()
+    except Exception:
+        free, total = None, spec.total_memory
+    frac = used / total
+    small = total <= 8 << 30
+    if frac < (0.55 if small else 0.92) and not (free is not None and free < 384 << 20):
+        return []
+    sev = "warning" if frac >= 0.85 or (free is not None and free < 384 << 20) else "info"
+    free_txt = f", {fmt_bytes(free)} free" if free is not None else ""
+    return [Finding(
+        "TL010", sev,
+        f"`{kernel_name}` tensors occupy {fmt_bytes(used)} of {fmt_bytes(total)} "
+        f"({frac:.0%}){free_txt}. On a small GPU the next compile or workspace may OOM.",
+        fix="use a smaller dtype, tile the batch, or free unused tensors first",
+        data={"tensorBytes": used, "totalMemory": total, "fraction": frac, "freeMemory": free})]
+
+
 def check(kernel, *args, **kwargs) -> list[Finding]:
     """Check live launch arguments for a ``@triton.jit`` function before launching it.
 
@@ -74,7 +105,8 @@ def check(kernel, *args, **kwargs) -> list[Finding]:
     constexprs = {p.name for p in getattr(kernel, "params", []) if p.is_constexpr}
     infos = [describe_arg(name, value, name in constexprs)
              for name, value in bound.arguments.items()]
-    return check_args(infos, getattr(kernel, "__name__", fn.__name__))
+    name = getattr(kernel, "__name__", fn.__name__)
+    return check_args(infos, name) + check_memory(infos, name)
 
 
 def guard(raise_on: str | None = None):

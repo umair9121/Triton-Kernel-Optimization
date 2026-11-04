@@ -29,6 +29,8 @@ matmul time with **r = 0.94**. A predicted 12% sector efficiency turned into a m
 pip install -e ".[gpu]"          # torch + triton (triton-windows on Windows)
 tritonlens run examples/matmul.py -o reports/     # capture, analyze, write HTML
 tritonlens lint examples/bad_access.py            # compiler-style findings
+tritonlens device --calibrate                     # measure this GPU's peaks (cached)
+tritonlens advise examples/matmul.py              # tiles/stages that fit this GPU
 tritonlens validate                               # check the layout models on your GPU
 ```
 
@@ -66,6 +68,13 @@ for finding in tritonlens.check(add_kernel, x[1:], y[1:], out[1:], n - 1, BLOCK_
 
 with tritonlens.guard(raise_on="warning"):   # raise instead of silently running slower
     add_kernel[grid](x[1:], y[1:], out[1:], n - 1, BLOCK_SIZE=1024)
+
+# Drop A100-sized autotune configs before Triton compiles them (seconds each, often OOM).
+@triton.autotune(configs=CONFIGS, key=["M", "N", "K"],
+                 prune_configs_by={"early_config_prune": tritonlens.device_pruner()})
+@triton.jit
+def matmul_kernel(...):
+    ...
 ```
 
 ## The report
@@ -77,6 +86,7 @@ with tritonlens.guard(raise_on="warning"):   # raise instead of silently running
 | ![Program tiling](docs/images/matmul_kernel_tiling.png) | **Program tiling.** The output tile each `program_id` writes, colored by launch order, with a play button and wave outlines. Shown: the grouped ordering (GROUP_M=8) that improves L2 reuse in matmul. |
 | ![Global access](docs/images/strided_gather_kernel_global.png) | **Global memory.** The vector-width budget of every load and store (layout, contiguity, alignment, mask, 16-byte limit), cross-checked against the PTX the compiler emitted, plus the 32-byte sectors warp 0 touches. Shown: a stride-8 gather using 4 of 32 sectors. |
 | ![IR and source](docs/images/matmul_kernel_ir.png) | **IR and source.** TTGIR with layouts highlighted and findings in the gutter, linked to the Python source line through `loc` metadata. |
+| | **Performance.** Occupancy limiters (warps / registers / shared memory / block slots), programs-per-SM schedule, VRAM headroom, L2 A-stripe vs this GPU's cache, a roofline using calibrated peaks, and a table of tile/pipeline configs that actually fit. Tuned for small GPUs: a 20-SM, 4 GB, 2 MB-L2 laptop part is the development target. |
 
 ## Lint rules
 
@@ -88,10 +98,18 @@ with tritonlens.guard(raise_on="warning"):   # raise instead of silently running
 | **TL004** | `convert_layout` that round-trips through shared memory (scratch size, estimated conflicts) | *convert_layout blocked1 -> blocked stages the tile through shared memory (17408 B scratch, estimated 4.50x bank-conflict factor).* |
 | **TL005** | wasted threads: layouts that replicate a small tensor, or mostly-masked blocks | *Mask against `n_cols`=781 keeps only 76% of the 1024-wide block active in every program.* |
 | **TL006** | launch arguments that defeat Triton's 16-byte specialization (offset views, odd row pitch) | *`x_ptr` (float32[1048576]) starts 4 bytes past a 16-byte boundary: Triton will not mark it tt.divisibility=16 and `misaligned_add_kernel` falls back to narrow loads/stores.* |
+| **TL007** | register spills, or occupancy too low to hide DRAM latency | *Occupancy 8% on RTX 3050 Ti (20 SMs). Memory-bound kernels need many warps in flight.* |
+| **TL008** | SM load imbalance: the grid does not divide evenly over this GPU's SMs | *25 equal-work programs on 20 SMs: the kernel takes as long as 40 programs would (62% SM utilization). Measured: 21 matmul tiles vs 20 doubled run time.* |
+| **TL009** | software-pipelined shared memory leaves room for only 1 block/SM | *num_stages=5 buffers 64 KiB of operand tiles; this GPU has 100 KiB per SM, so only 1 block fits. num_stages=3: 3 blocks (25%).* |
+| **TL010** | VRAM headroom: tensors leave too little room on a small GPU | *Launch tensors occupy 3.1 GiB of 4.0 GiB. Triton also needs several hundred MB to compile a new specialization.* |
+| **TL011** | grouped-matmul A-stripe does not fit in this GPU's L2 | *GROUP_M=8 wants 4.0 MiB of A in L2 so neighbouring programs reuse it. This GPU has 2 MiB (an A100 has 40 MiB). GROUP_M=4 would fit.* |
 
 Severities are calibrated against measurements. A narrow access that still fills every sector
 measured within 6% of a 16-byte one on a DRAM-bound kernel, so it is reported as `info`. An
-uncoalesced access measured 4.3x slower, so it is reported as an `error`.
+uncoalesced access measured 4.3x slower, so it is reported as an `error`. Device rules
+TL007-TL009 were timed on the 3050 Ti: fixing a 25-program 128x128 matmul to 64x64 was
+**1.63x**, splitting an 8-row reduction across 20 SMs was **1.80x**, and dropping
+num_stages 5→4 (1→2 blocks/SM) was **1.09x**. See [benchmarks/results.md](benchmarks/results.md).
 
 ## How it works
 
@@ -107,12 +125,16 @@ flowchart LR
     IR --> Ptx["PTX attribution via .loc"]
     Ptx --> Global
     Parser --> Tiling["per-program evaluator"]
-    Banks --> Lint["lint TL001-TL006"]
+    Banks --> Lint["lint TL001-TL011"]
     Global --> Lint
+    Device["device limits + occupancy + L2/VRAM"] --> Lint
+    Device --> Advise["config advisor / autotune prune"]
     Lint --> Out["text / JSON / SARIF"]
     Lint --> Html["single-file HTML report"]
     Layouts --> Html
     Tiling --> Html
+    Device --> Html
+    Advise --> Html
 ```
 
 - **Capture** (`capture.py`). A context manager wraps `JITFunction.run`. Each launch yields the
@@ -145,6 +167,16 @@ flowchart LR
   tile corners for every `program_id` with the captured arguments, then maps byte offsets back
   to `(row, col)` through the destination's real strides. Grouped ordering, one-row-per-program
   kernels and transposed stores need no special cases.
+- **Device model** (`device.py`, `analysis/occupancy.py`). Arch occupancy limits (registers,
+  shared memory, warps, block slots), live `torch` properties, and optional measured peaks
+  (`tritonlens device --calibrate`). The occupancy calculator matched
+  `cuOccupancyMaxActiveBlocksPerMultiprocessor` on 207/207 configs of this GPU.
+- **Roofline / VRAM / L2** (`analysis/perf.py`, `analysis/budget.py`). FLOPs from `tt.dot` ×
+  loop trips × grid; DRAM bytes capped at each tensor's size; VRAM = unique tensor storage vs
+  the card; L2 stripe = `GROUP_M * BLOCK_M * K * elem` for grouped matmul.
+- **Config advisor / autotune prune** (`analysis/advise.py`, `autotune.py`). Host-side search
+  for tiles that fill this GPU's SMs and fit in 100 KiB shared / 2 MB L2. `device_pruner()`
+  drops those configs from `triton.autotune` *before* compilation.
 
 ## Validation
 
@@ -159,6 +191,13 @@ All results are in [benchmarks/results.md](benchmarks/results.md):
    reports a cost rather than a runtime.
 3. **Global memory.** Flagged kernels are compared with their fixed variants. Sector efficiency
    predicts bandwidth; vector width alone does not, on a DRAM-bound kernel.
+4. **Occupancy.** Predicted blocks/SM matched the CUDA driver on 207/207 register, shared-memory
+   and warp-limited configs.
+5. **SM balance.** Run time of equal-work matmul tiles follows `ceil(programs/SMs)` within 6%;
+   the last-wave model is pessimistic when several blocks share an SM.
+6. **Device-rule fixes.** TL007-TL009 suggestions timed on this GPU: 1.09x to 1.80x. A
+   108-config A100-style autotune sweep at 640³ drops from 204 s (26 failed compiles) to
+   60 s with the same winning kernel.
 
 ## Scope and limitations
 
@@ -178,11 +217,13 @@ src/tritonlens/
   capture.py          launch capture and IR loading
   ir/                 TTGIR parser (attributes, types, ops, locations)
   layouts/            blocked, slice, mma v2, dot_op, shared (swizzle) models
-  analysis/           axis info, bank conflicts, coalescing, PTX, tiling, lint, launch checks
+  analysis/           axis info, banks, coalescing, PTX, tiling, occupancy, roofline, VRAM/L2, lint
+  autotune.py         early_config_prune for small GPUs
+  device.py           arch limits, detection, calibration
   report/             JSON builder and the single-file HTML/JS viewer
-  cli.py              tritonlens run | analyze | lint | validate
+  cli.py              run | analyze | lint | validate | device | advise
 examples/             kernels used as fixtures and benchmarks (incl. deliberately bad ones)
-benchmarks/           swizzle sweep, lint-fix bandwidth study, results
+benchmarks/           swizzle sweep, lint-fix, occupancy, waves, device-rule and autotune studies
 tests/                parser/model/analysis tests on checked-in IR; GPU tests marked `gpu`
 ```
 

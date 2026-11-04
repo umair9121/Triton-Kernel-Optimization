@@ -5,6 +5,7 @@
     tritonlens lint examples/softmax.py --format sarif      # CI-friendly findings
     tritonlens validate                                     # check layout models on this GPU
     tritonlens device --calibrate                           # GPU limits + measured peaks
+    tritonlens advise examples/matmul.py                    # configs that fit this GPU
 """
 
 from __future__ import annotations
@@ -175,6 +176,63 @@ def cmd_device(args) -> int:
     return 0
 
 
+def cmd_advise(args) -> int:
+    from .analysis.advise import format_advice
+    from .analysis.budget import fmt_bytes
+    from .autotune import evaluate
+
+    if args.configs:
+        # Dry-evaluate a JSON list of {kwargs, num_warps, num_stages} plus M/N/K.
+        from .device import detect, for_target
+
+        payload = json.loads(Path(args.configs).read_text(encoding="utf-8"))
+        spec = detect() or for_target("cuda:86")
+        named = payload.get("args", {})
+        cfgs = [_Cfg(c) for c in payload["configs"]]
+        decisions = evaluate(cfgs, named, spec)
+        keep = sum(1 for d in decisions if d.keep)
+        print(f"{spec.name}: keeping {keep}/{len(decisions)} configs")
+        for d in decisions:
+            mark = "keep" if d.keep else "drop"
+            print(f"  {mark}  {d.config}: {d.reason}".rstrip())
+        return 0
+
+    if not args.target:
+        print("tritonlens advise: pass a script, .ttgir, captured-IR directory, or --configs",
+              file=sys.stderr)
+        return 1
+    results = _analyze_all(_load_kernels(Path(args.target), args.script_args))
+    if not results:
+        return 1
+    for an, findings in results:
+        print(format_advice(an.name, an.perf.advice, an.perf.device))
+        b = an.perf.budget
+        if b and b.total_memory:
+            print(f"  VRAM  {fmt_bytes(b.tensor_bytes)} of {fmt_bytes(b.total_memory)} "
+                  f"({b.fraction:.0%})"
+                  + (f"  L2 stripe {fmt_bytes(b.l2_group_bytes)}" if b.l2_group_bytes else ""))
+        extra = [f for f in findings if f.rule in ("TL007", "TL008", "TL009", "TL010", "TL011")]
+        for f in extra:
+            print(f"  {f.severity} {f.rule}: {f.message}")
+            if f.fix:
+                print(f"    fix: {f.fix}")
+        print()
+    return 0
+
+
+class _Cfg:
+    """Minimal ``triton.Config`` stand-in for ``tritonlens advise --configs``."""
+
+    def __init__(self, data: dict):
+        self.kwargs = data.get("kwargs", data)
+        self.num_warps = data.get("num_warps", 4)
+        self.num_stages = data.get("num_stages", 3)
+
+    def __repr__(self) -> str:
+        kw = " ".join(f"{k}={v}" for k, v in self.kwargs.items())
+        return f"{kw} w{self.num_warps} s{self.num_stages}"
+
+
 TIME_HELP = ("replay each kernel's first launch to measure it (roofline %%); replays repeat side "
              "effects, so avoid it for kernels that update inputs in place")
 
@@ -220,6 +278,11 @@ def build_parser() -> argparse.ArgumentParser:
                      help="measure bandwidth and matmul throughput and cache the result")
     dev.add_argument("--json", action="store_true")
     dev.set_defaults(func=cmd_device)
+
+    adv = sub.add_parser("advise", help="suggest tile/pipeline configs that fit this GPU")
+    adv.add_argument("target", nargs="?", help="script, .ttgir or captured-IR directory")
+    adv.add_argument("--configs", help="JSON file of autotune configs to prune without compiling")
+    adv.set_defaults(func=cmd_advise)
     return p
 
 

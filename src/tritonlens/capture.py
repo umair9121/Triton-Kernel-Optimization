@@ -136,6 +136,10 @@ def _metadata_dict(compiled) -> dict[str, Any]:
 
         if torch.cuda.is_available():
             out["device"] = torch.cuda.get_device_name()
+            free, total = torch.cuda.mem_get_info()
+            out["free_memory"] = int(free)
+            out["total_memory"] = int(total)
+            out["allocated"] = int(torch.cuda.memory_allocated())
     except ImportError:
         pass
     return out

@@ -9,8 +9,8 @@ from tritonlens.capture import CapturedKernel
 from tritonlens.device import DeviceSpec
 
 FIXTURES = Path(__file__).parent / "fixtures"
-GPU = DeviceSpec(name="test 3050", arch=86, sm_count=20, l2_bytes=2 << 20,
-                 mem_clock_khz=6001000, mem_bus_width=128,
+GPU = DeviceSpec(name="test 3050", arch=86, sm_count=20, total_memory=4 << 30,
+                 l2_bytes=2 << 20, mem_clock_khz=6001000, mem_bus_width=128,
                  measured={"gbps": 170.0, "fp16_tflops": 14.0, "fp32_tflops": 4.0})
 
 
@@ -80,3 +80,33 @@ def test_tl007_spills():
     an = analyze_captured(load("matmul_kernel", n_spills=64), GPU)
     found = [f for f in run_lint(an) if f.rule == "TL007"]
     assert found and "64 bytes of local memory" in found[0].message
+
+
+def _set_arg(an, name, **fields):
+    for arg in an.launch.args:
+        if arg.name == name:
+            for key, value in fields.items():
+                setattr(arg, key, value)
+            return
+    raise KeyError(name)
+
+
+def test_tl010_vram_headroom():
+    an = analyze_captured(load("matmul_kernel"), GPU)
+    assert "TL010" not in rules(an)
+    for name in ("a_ptr", "b_ptr", "c_ptr"):
+        _set_arg(an, name, shape=[30000, 30000])  # 3 x 1.68 GiB on a 4 GiB card
+    an._perf = None
+    found = [f for f in run_lint(an) if f.rule == "TL010"]
+    assert found and found[0].severity == "warning"
+    assert found[0].data["fraction"] > 0.85
+
+
+def test_tl011_l2_stripe():
+    an = analyze_captured(load("matmul_kernel"), GPU)
+    assert an.perf.budget.l2_fits is True
+    assert "TL011" not in rules(an)
+    _set_arg(an, "K", value=4096)  # 8 * 64 * 4096 * 2 = 4 MiB > 2 MiB L2
+    an._perf = None
+    found = [f for f in run_lint(an) if f.rule == "TL011"]
+    assert found and found[0].data["suggestedGroupM"] == 4

@@ -20,6 +20,8 @@
     return el;
   }
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const fmtBytes = (b) => (b >= 1 << 30 ? `${(b / (1 << 30)).toFixed(2)} GiB` : b >= 1 << 20 ? `${(b / (1 << 20)).toFixed(1)} MiB` : b >= 1024 ? `${(b / 1024).toFixed(1)} KiB` : `${Math.round(b)} B`);
+  const pct = (x) => `${Math.round(x * 100)}%`;
   const fmtLoc = (loc) => (loc ? `${loc.file.split(/[\\/]/).pop()}:${loc.line}` : "");
   const opsById = new Map(D.ops.map((o) => [o.id, o]));
   const tensorsByKey = new Map(D.tensors.map((t) => [t.key, t]));
@@ -149,7 +151,7 @@
     if (op && D.opTensors[f.op]) links.push(h("a", { onclick: () => focusTensor(D.opTensors[f.op][0].key) }, "layout"));
     if (["TL003", "TL004"].includes(f.rule)) links.push(h("a", { onclick: () => focusShared(f.op) }, "banks"));
     if (["TL001", "TL002"].includes(f.rule)) links.push(h("a", { onclick: () => focusGlobal(f.op) }, "access"));
-    if (["TL007", "TL008", "TL009"].includes(f.rule)) links.push(h("a", { onclick: () => showTab("perf") }, "performance"));
+    if (["TL007", "TL008", "TL009", "TL010", "TL011"].includes(f.rule)) links.push(h("a", { onclick: () => showTab("perf") }, "performance"));
     return h("div", { class: `finding ${f.severity}` },
       h("div", { class: "head" },
         h("span", { class: `badge ${f.severity}` }, f.severity),
@@ -171,13 +173,17 @@
     const worstBank = sh.length ? Math.max(...sh.map((a) => a.degree)) : null;
     const card = (key, val, sub) => h("div", { class: "card" }, h("div", { class: "k" }, key),
       h("div", { class: "v" }, String(val)), sub ? h("div", { class: "s" }, sub) : null);
+    const P = D.perf, o = P && P.occupancy, w = P && P.waves, b = P && P.budget;
     sec.append(h("div", { class: "cards" },
       card("Global accesses", gl.length, narrow ? `${narrow} narrower than 16 B/lane` : "all 16 B/lane"),
       card("Coalescing", avgEff === null ? "n/a" : `${Math.round(avgEff * 100)}%`, "mean sector efficiency"),
       card("Shared accesses", D.shared.accesses.length, `${D.shared.buffers.length} buffers`),
       card("Worst bank conflict", worstBank === null ? "n/a" : `${worstBank.toFixed(2)}x`, "explicit shared ops"),
       card("Programs", k.grid ? k.grid.reduce((a, b) => a * b, 1) : "n/a", k.grid ? `grid ${k.grid.join(" x ")}` : "no launch captured"),
-      card("Threads / program", k.numWarps * k.threadsPerWarp, `${k.numWarps} warps`)));
+      card("Threads / program", k.numWarps * k.threadsPerWarp, `${k.numWarps} warps`),
+      o ? card("Occupancy", pct(o.occupancy), `${o.active_warps}/${o.max_warps_per_sm} warps · ${o.limiter}`) : null,
+      w ? card("SM utilization", pct(w.smBalance), `${w.total_blocks} programs / ${w.sm_count} SMs`) : null,
+      b && b.totalMemory ? card("VRAM", `${pct(b.fraction)} of ${fmtBytes(b.totalMemory)}`, `${fmtBytes(b.tensorBytes)} tensors`) : null));
 
     const left = h("div", { class: "panel" }, h("h2", {}, `Findings (${D.findings.length})`));
     if (!D.findings.length) left.append(h("div", { class: "empty" }, "No issues found."));
@@ -759,9 +765,7 @@
   }
 
   // ---- performance --------------------------------------------------------------------
-  const fmtBytes = (b) => (b >= 1 << 30 ? `${(b / (1 << 30)).toFixed(2)} GiB` : b >= 1 << 20 ? `${(b / (1 << 20)).toFixed(1)} MiB` : b >= 1024 ? `${(b / 1024).toFixed(1)} KiB` : `${Math.round(b)} B`);
   const fmtMs = (ms) => (ms === null || ms === undefined ? "n/a" : ms < 0.1 ? `${(ms * 1000).toFixed(1)} µs` : `${ms.toFixed(3)} ms`);
-  const pct = (x) => `${Math.round(x * 100)}%`;
 
   function occupancyPanel(P) {
     const o = P.occupancy, lim = P.device.limits;
@@ -876,6 +880,8 @@
     const notes = [];
     if (!r.tripsKnown) notes.push("Some loop trip counts could not be evaluated; work is under-counted.");
     if (r.l2Resident) notes.push(`The working set (${fmtBytes(r.dramBytes)}) fits in the ${fmtBytes(r.l2Bytes)} L2: repeated launches never reach DRAM, so measured bandwidth can exceed the DRAM roof.`);
+    const bud = P.budget;
+    if (bud && bud.l2Fits === false) notes.push(`Grouped A-stripe is ${fmtBytes(bud.l2GroupBytes)} vs ${fmtBytes(bud.l2Bytes)} L2: the DRAM lower bound (each tensor once) is optimistic on this GPU.`);
     if (r.flops && r.waveEfficiency < 0.99) notes.push(`Compute time includes the SM imbalance (${pct(r.waveEfficiency)} utilization).`);
     if (!r.measuredMs) notes.push("Run with `tritonlens run --time` to measure the kernel and place it on the chart.");
     for (const n of notes) panel.append(h("div", { class: "note" }, n));
@@ -895,17 +901,19 @@
     const dev = P.device, o = P.occupancy, w = P.waves, r = P.roofline;
     const card = (key, val, sub) => h("div", { class: "card" }, h("div", { class: "k" }, key),
       h("div", { class: "v" }, String(val)), sub ? h("div", { class: "s" }, sub) : null);
-    const m = dev.measured || {};
+    const m = dev.measured || {}, b = P.budget;
     sec.append(h("div", { class: "cards" },
       card("Device", `${dev.sm_count} SMs`, `${dev.name} · sm_${dev.arch}`),
       card("Measured peaks", m.gbps ? `${m.gbps.toFixed(0)} GB/s` : "not calibrated", m.fp16_tflops ? `${m.fp16_tflops.toFixed(1)} TFLOP/s fp16` : "tritonlens device --calibrate"),
       card("Occupancy", o ? pct(o.occupancy) : "n/a", o ? `${o.active_warps}/${o.max_warps_per_sm} warps · ${o.limiter}` : ""),
       card("SM utilization", w ? pct(w.smBalance) : "n/a", w ? `${w.total_blocks} programs / ${w.sm_count} SMs` : ""),
+      card("VRAM", b && b.totalMemory ? fmtBytes(b.tensorBytes) : "n/a", b && b.totalMemory ? `${pct(b.fraction)} of ${fmtBytes(b.totalMemory)}` : "no launch tensors"),
+      card("L2 stripe", b && b.l2GroupBytes ? fmtBytes(b.l2GroupBytes) : "n/a", b && b.l2Bytes ? (b.l2Fits ? `fits ${fmtBytes(b.l2Bytes)} L2` : `over ${fmtBytes(b.l2Bytes)} L2`) : ""),
       card("Bound", r && r.boundMs ? `${r.bound}` : "n/a", r && r.boundMs ? `≥ ${fmtMs(r.boundMs)}` : ""),
       card("Measured", r && r.measuredMs ? fmtMs(r.measuredMs) : "n/a", r && r.attained ? `${pct(r.attained)} of roofline` : "run with --time")));
-    const perfFindings = D.findings.filter((f) => ["TL007", "TL008", "TL009"].includes(f.rule));
-    const left = h("div", {}, occupancyPanel(P), schedulePanel(P));
-    const right = h("div", {}, rooflinePanel(P));
+    const perfFindings = D.findings.filter((f) => ["TL007", "TL008", "TL009", "TL010", "TL011"].includes(f.rule));
+    const left = h("div", {}, occupancyPanel(P), schedulePanel(P), advicePanel(P));
+    const right = h("div", {}, rooflinePanel(P), budgetPanel(P));
     if (perfFindings.length) {
       const fp = h("div", { class: "panel", style: "margin-top:16px" }, h("h2", {}, "Device findings"));
       for (const f of perfFindings) fp.append(findingEl(f));
@@ -913,6 +921,58 @@
     }
     left.querySelectorAll(".panel").forEach((p, i) => i && (p.style.marginTop = "16px"));
     sec.append(h("div", { class: "grid-ir" }, left, right));
+  }
+
+  function budgetPanel(P) {
+    const b = P.budget;
+    const panel = h("div", { class: "panel", style: "margin-top:16px" }, h("h2", {}, "VRAM and L2"));
+    if (!b) return panel.append(h("div", { class: "empty" }, "No launch captured.")), panel;
+    if (b.totalMemory) {
+      const frac = Math.min(100, b.fraction * 100);
+      const box = h("div", { class: "limits" });
+      box.append(h("div", { class: `row${b.fraction >= 0.55 ? " bind" : ""}` },
+        h("span", { class: "name" }, "tensors"),
+        h("div", { class: "bar" }, h("div", { style: `width:${frac}%;background:${b.fraction >= 0.85 ? "var(--error)" : b.fraction >= 0.55 ? "var(--warning)" : "var(--ok)"}` })),
+        h("span", { class: "mono" }, fmtBytes(b.tensorBytes))));
+      panel.append(h("div", { class: "small muted" },
+        `${fmtBytes(b.tensorBytes)} of ${fmtBytes(b.totalMemory)}` + (b.freeMemory != null ? ` · ${fmtBytes(b.freeMemory)} free at capture` : "")),
+        box);
+      if (b.perTensor && b.perTensor.length) {
+        const tb = h("table", { class: "t", style: "margin-top:8px" }, h("tr", {}, h("th", {}, "tensor"), h("th", {}, "bytes")));
+        for (const t of b.perTensor) tb.append(h("tr", {}, h("td", { class: "mono" }, t.name), h("td", {}, fmtBytes(t.bytes))));
+        panel.append(tb);
+      }
+    }
+    if (b.l2GroupBytes != null) {
+      panel.append(h("div", { class: "note" },
+        `GROUP_M=${b.groupM} A-stripe ${fmtBytes(b.l2GroupBytes)} vs ${fmtBytes(b.l2Bytes)} L2` +
+        (b.l2Fits ? "." : `. GROUP_M=${b.suggestedGroupM} would fit.`)));
+    } else if (b.l2Bytes) {
+      panel.append(h("div", { class: "note" }, `This GPU has ${fmtBytes(b.l2Bytes)} of L2 (an A100 has 40 MiB). Grouped program ordering only helps if the A-stripe fits.`));
+    }
+    return panel;
+  }
+
+  function advicePanel(P) {
+    const panel = h("div", { class: "panel" }, h("h2", {}, "Configs that fit this GPU"));
+    const rows = P.advice || [];
+    if (!rows.length) return panel.append(h("div", { class: "empty" }, "No BLOCK_M/BLOCK_N constexprs captured, so there is nothing to retile.")), panel;
+    panel.append(h("div", { class: "small muted" },
+      "Host-side search: shared-memory lower bound, SM balance, L2 stripe, occupancy from this kernel's register density. Nothing is compiled."));
+    const tb = h("table", { class: "t", style: "margin-top:8px" },
+      h("tr", {}, h("th", {}, ""), h("th", {}, "config"), h("th", {}, "programs"), h("th", {}, "SM"), h("th", {}, "blk/SM"), h("th", {}, "smem"), h("th", {}, "why")));
+    for (const s of rows) {
+      tb.append(h("tr", { class: s.current ? "cur" : "" },
+        h("td", {}, s.current ? "now" : "try"),
+        h("td", { class: "mono" }, s.label),
+        h("td", {}, String(s.programs)),
+        h("td", {}, pct(s.smBalance)),
+        h("td", {}, String(s.estBlocksPerSm)),
+        h("td", {}, `${Math.round(s.smem / 1024)} KiB`),
+        h("td", { class: "muted" }, (s.reasons || []).join("; "))));
+    }
+    panel.append(tb);
+    return panel;
   }
 
   const RENDER = { overview: renderOverview, layouts: renderLayouts, shared: renderShared, global: renderGlobal, tiling: renderTiling, perf: renderPerf, ir: renderIR };

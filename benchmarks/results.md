@@ -8,6 +8,10 @@ Everything here was measured on an **NVIDIA GeForce RTX 3050 Ti Laptop GPU** (Am
 python -m tritonlens validate                 # layout ground truth
 python benchmarks/bank_conflicts.py           # shared-memory swizzle sweep
 python benchmarks/lint_fixes.py               # global-memory findings vs bandwidth
+python benchmarks/occupancy_check.py          # occupancy vs CUDA driver
+python benchmarks/waves.py                    # SM-balance model vs time
+python benchmarks/device_rules.py             # TL007-TL009 suggested fixes vs time
+python benchmarks/autotune_prune.py --dry     # how many A100 configs survive on this GPU
 ```
 
 Laptop GPUs change clocks with temperature, so every timing table interleaves the variants over
@@ -88,6 +92,50 @@ Each case pairs a kernel the linter flags with a variant that applies the sugges
   or L2-resident kernels and on GPUs with far more bandwidth per SM than this one.
 
 Full table: [`results/lint_fixes.md`](results/lint_fixes.md).
+
+## 4. Occupancy, SM balance and device-rule fixes
+
+These are the analyses that matter on a 20-SM, 4 GB, 2 MB-L2 laptop GPU. Full tables:
+
+- [`results/occupancy_check.md`](results/occupancy_check.md) — **207/207** configs match
+  `cuOccupancyMaxActiveBlocksPerMultiprocessor`.
+- [`results/waves.md`](results/waves.md) — equal-work programs finish when the busiest SM
+  does (`ceil(P/S)*S`). Wave-count is pessimistic when several blocks share an SM; the
+  per-SM balance model stayed within **6%** of measured time.
+- [`results/device_rules.md`](results/device_rules.md) — flagged configs vs the suggested
+  fix, CUDA-graph median of 7 interleaved rounds:
+
+| case | flagged → fix | speedup |
+|---|---|---|
+| matmul 640³ fp16, 128x128x64 w8 (25 programs / 62% SM) | 64x64x64 w4 (100 programs / 100%) | **1.63x** |
+| matmul 2048³ fp16, 64x64x64 w4 s5 (1 block/SM) | s4 (2 blocks/SM) | **1.09x** |
+| row sum 8 × 4M fp32 (8 programs, 12 SMs idle) | split-K to 40 programs | **1.80x** |
+
+Going from 20 to 21 matmul tiles on this GPU **doubles** run time: the extra tile is a
+second wave on one SM while 19 SMs sit idle.
+
+## 5. Autotune pruning
+
+A 108-config datacenter-style sweep (`BLOCK_M/N` ∈ {64,128,256}, `BLOCK_K` ∈ {32,64},
+`num_stages` ∈ {3,4,5}, `num_warps` ∈ {4,8}, `GROUP_M=8`) is autotuned with and without
+`tritonlens.autotune.device_pruner`. Each run uses a fresh Triton cache so compile time is
+included. The pruner does not change the winning kernel; it only skips configs this GPU
+cannot launch or that leave SMs idle when a balanced config exists.
+
+| size | configs | failed compiles | autotune | best kernel | best config |
+|---|---|---|---|---|---|
+| 640³ all | 108 | 26 | 204 s | 0.076 ms (6.94 TFLOP/s) | `64x64x32 w4 s3` |
+| 640³ pruned | 68 | 0 | **60 s (3.4×)** | 0.075 ms (7.00 TFLOP/s) | `64x64x32 w4 s3` |
+| 1024³ all | 108 | 26 | 204 s | 0.291 ms (7.37 TFLOP/s) | `64x64x32 w4 s3` |
+| 1024³ pruned | 82 | 0 | **105 s (1.9×)** | 0.292 ms (7.36 TFLOP/s) | `64x64x32 w4 s3` |
+| 2048³ all | 108 | 26 | 209 s | 2.262 ms (7.59 TFLOP/s) | `64x64x32 w4 s4` |
+| 2048³ pruned | 82 | 0 | **111 s (1.9×)** | 2.272 ms (7.56 TFLOP/s) | `64x64x32 w4 s4` |
+
+The 26 failed compiles are 256-wide tiles that need more than 99 KiB of shared memory:
+Triton still compiles them, then the launch returns OutOfResources. On a 4 GB laptop that
+is minutes of heat and allocator pressure for kernels that can never run. At 640³ the
+128×128 tiles (25 programs → 62% SM) are also dropped because a 64×64 config in the same
+list reaches 100%. Full table: [`results/autotune_prune.md`](results/autotune_prune.md).
 
 ## What is estimated
 

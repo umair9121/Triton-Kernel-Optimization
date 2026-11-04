@@ -10,10 +10,12 @@ TL006  launch arguments that defeat Triton's alignment specialization
 TL007  register spills or occupancy too low to hide memory latency
 TL008  SM load imbalance: the grid does not divide evenly over the SMs
 TL009  shared memory (pipeline stages) limits blocks per SM
+TL010  VRAM headroom: tensors leave too little room on a small GPU
+TL011  grouped-matmul A-stripe does not fit in this GPU's L2
 =====  ========================================================================
 
-TL007-TL009 depend on the target GPU (``Analysis.device``): the same kernel can be fine on a
-108-SM A100 and leave a 20-SM laptop GPU half idle.
+TL007-TL011 depend on the target GPU (``Analysis.device``): the same kernel can be fine on a
+108-SM A100 and leave a 20-SM, 4 GB, 2 MB-L2 laptop GPU idle, OOM, or L2-thrashing.
 """
 
 from __future__ import annotations
@@ -39,6 +41,8 @@ RULES = {
     "TL007": "Register pressure / low occupancy",
     "TL008": "SM load imbalance",
     "TL009": "Shared memory limits occupancy",
+    "TL010": "VRAM headroom",
+    "TL011": "L2 working set (grouped matmul)",
 }
 
 
@@ -478,8 +482,57 @@ def rule_tl009(an: Analysis) -> list[Finding]:
                      for s, smem, o in options]})]
 
 
+def rule_tl010(an: Analysis) -> list[Finding]:
+    from .budget import fmt_bytes
+
+    b = getattr(an.perf, "budget", None)
+    if b is None or not b.total_memory or not b.tensor_bytes:
+        return []
+    total, used, frac = b.total_memory, b.tensor_bytes, b.fraction
+    free = b.headroom
+    small = total <= 8 << 30
+    tight_free = free is not None and free < (512 << 20 if small else 256 << 20)
+    if frac < (0.55 if small else 0.92) and not tight_free:
+        return []
+    sev = "warning" if frac >= 0.85 or (small and tight_free and free < 384 << 20) else "info"
+    free_txt = f", {fmt_bytes(free)} reported free" if free is not None else ""
+    compile_note = (
+        " Triton also needs several hundred MB to compile a new specialization, so the next "
+        "autotune config or extra workspace is likely to OOM."
+        if small else " Little headroom remains for workspaces or a new compilation.")
+    return [Finding(
+        "TL010", sev,
+        f"Launch tensors occupy {fmt_bytes(used)} of {fmt_bytes(total)} "
+        f"({frac:.0%}) on {_gpu(an)}{free_txt}.{compile_note}",
+        _anchor(an),
+        "use fp16/bf16, process a batch tile at a time, or move intermediates to host memory",
+        {"tensorBytes": used, "totalMemory": total, "fraction": frac, "freeMemory": free})]
+
+
+def rule_tl011(an: Analysis) -> list[Finding]:
+    from .budget import fmt_bytes
+
+    b = getattr(an.perf, "budget", None)
+    if b is None or b.l2_fits is not False or not b.l2_group_bytes or not b.group_m:
+        return []
+    better = b.suggested_group_m
+    fix = (f"set GROUP_M={better} so the stripe is "
+           f"{fmt_bytes(b.l2_group_bytes * better / b.group_m)}"
+           if better and better < b.group_m else
+           "set GROUP_M=1 (grouped ordering cannot help on this L2)")
+    return [Finding(
+        "TL011", "info",
+        f"Grouped ordering uses GROUP_M={b.group_m}: each group wants to keep "
+        f"{b.group_m}×BLOCK_M rows of K in L2 ({fmt_bytes(b.l2_group_bytes)}) so neighbouring "
+        f"programs reuse A. {_gpu(an)} has {fmt_bytes(b.l2_bytes)} of L2, so the stripe misses "
+        "the cache and the grouping (sized for a 40 MiB A100 L2) does not pay off.",
+        _anchor(an), fix,
+        {"groupM": b.group_m, "l2GroupBytes": b.l2_group_bytes, "l2Bytes": b.l2_bytes,
+         "suggestedGroupM": better})]
+
+
 ALL_RULES = [rule_tl001, rule_tl002, rule_tl003, rule_tl004, rule_tl005, rule_tl006,
-             rule_tl007, rule_tl008, rule_tl009]
+             rule_tl007, rule_tl008, rule_tl009, rule_tl010, rule_tl011]
 
 
 def _dedupe(findings: list[Finding]) -> list[Finding]:

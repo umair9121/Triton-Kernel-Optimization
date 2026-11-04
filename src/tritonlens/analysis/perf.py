@@ -123,6 +123,8 @@ class Performance:
     roofline: Roofline | None
     regs_needed_for_next_block: int | None = None
     has_dot: bool = False
+    budget: object | None = None
+    advice: list = field(default_factory=list)
 
     def to_json(self) -> dict:
         return {
@@ -132,6 +134,8 @@ class Performance:
             "roofline": self.roofline.to_json() if self.roofline else None,
             "regsForNextBlock": self.regs_needed_for_next_block,
             "hasDot": self.has_dot,
+            "budget": self.budget.to_json() if self.budget else None,
+            "advice": [s.to_json() for s in self.advice],
         }
 
 
@@ -266,6 +270,8 @@ def regs_for_next_block(device: DeviceSpec, occ: occ_mod.Occupancy) -> int | Non
 
 def analyze_performance(an: Analysis, device: DeviceSpec | None = None) -> Performance:
     from ..device import for_target
+    from .advise import advise
+    from .budget import analyze_budget
 
     device = device or an.device or for_target(an.module.target)
     occ = occ_mod.from_metadata(device, an.metadata)
@@ -277,5 +283,14 @@ def analyze_performance(an: Analysis, device: DeviceSpec | None = None) -> Perfo
         roof = roofline(an, device, eff)
     except (_Unknown, KeyError, IndexError, TypeError, AttributeError):
         roof = None
+    try:
+        budget = analyze_budget(an, device)
+    except (KeyError, TypeError, AttributeError):
+        budget = None
+    try:
+        advice = advise(an, device, occ)
+    except (KeyError, TypeError, AttributeError, ZeroDivisionError):
+        advice = []
     return Performance(device, occ, waves, roof,
-                       regs_for_next_block(device, occ) if occ else None, has_dot)
+                       regs_for_next_block(device, occ) if occ else None, has_dot,
+                       budget, advice)

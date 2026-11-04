@@ -105,6 +105,7 @@ table.t td { padding: 5px 8px; border-bottom: 1px solid var(--border); }
 table.t tr.click { cursor: pointer; }
 table.t tr.click:hover td { background: var(--panel2); }
 table.t tr.sel td { background: rgba(95,179,249,.12); }
+table.t tr.cur td { background: rgba(87,199,133,.10); }
 
 .bar { height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden; }
 .bar > div { height: 100%; background: var(--accent); }

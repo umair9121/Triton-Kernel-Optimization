@@ -39,6 +39,9 @@ def test_report_contents_matmul():
     assert perf["occupancy"]["blocks_per_sm"] == 5
     assert perf["waves"]["total_blocks"] == 256
     assert perf["roofline"]["flops"] == 2 * 1024 ** 3
+    assert perf["budget"]["tensorBytes"] == 3 * 1024 * 1024 * 2
+    assert perf["budget"]["l2Fits"] is True
+    assert perf["advice"] and perf["advice"][0]["current"] is True
 
 
 def test_html_is_self_contained():
