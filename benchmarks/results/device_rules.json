@@ -1,0 +1,142 @@
+{
+  "device": "NVIDIA GeForce RTX 3050 Ti Laptop GPU",
+  "rows": [
+    {
+      "case": "matmul 640^3 fp16",
+      "variant": "128x128x64 w8 s3 (flagged)",
+      "ms": 0.06764955073595047,
+      "speedup": 1.0,
+      "rate": "7.75 TFLOP/s",
+      "blocksPerSm": 1,
+      "occupancy": 0.16666666666666666,
+      "programs": 25,
+      "smBalance": 0.625,
+      "rules": [
+        "TL007",
+        "TL008"
+      ]
+    },
+    {
+      "case": "matmul 640^3 fp16",
+      "variant": "64x128x64 w4 s3",
+      "ms": 0.04938136786222458,
+      "speedup": 1.3699408028691031,
+      "rate": "10.62 TFLOP/s",
+      "blocksPerSm": 2,
+      "occupancy": 0.16666666666666666,
+      "programs": 50,
+      "smBalance": 0.8333333333333334,
+      "rules": [
+        "TL008",
+        "TL009"
+      ]
+    },
+    {
+      "case": "matmul 640^3 fp16",
+      "variant": "64x64x64 w4 s3",
+      "ms": 0.0414508581161499,
+      "speedup": 1.6320422256733245,
+      "rate": "12.65 TFLOP/s",
+      "blocksPerSm": 3,
+      "occupancy": 0.25,
+      "programs": 100,
+      "smBalance": 1.0,
+      "rules": [
+        "TL009"
+      ]
+    },
+    {
+      "case": "matmul 2048^3 fp16",
+      "variant": "64x64x64 w4 s5 (flagged)",
+      "ms": 2.5269999504089355,
+      "speedup": 1.0,
+      "rate": "6.80 TFLOP/s",
+      "blocksPerSm": 1,
+      "occupancy": 0.08333333333333333,
+      "programs": 1024,
+      "smBalance": 0.9846153846153847,
+      "rules": [
+        "TL007",
+        "TL009"
+      ]
+    },
+    {
+      "case": "matmul 2048^3 fp16",
+      "variant": "64x64x64 w4 s4",
+      "ms": 2.314387798309326,
+      "speedup": 1.091865396220514,
+      "rate": "7.42 TFLOP/s",
+      "blocksPerSm": 2,
+      "occupancy": 0.16666666666666666,
+      "programs": 1024,
+      "smBalance": 0.9846153846153847,
+      "rules": [
+        "TL009"
+      ]
+    },
+    {
+      "case": "matmul 2048^3 fp16",
+      "variant": "64x64x64 w4 s3",
+      "ms": 2.3336281776428223,
+      "speedup": 1.0828631461595721,
+      "rate": "7.36 TFLOP/s",
+      "blocksPerSm": 3,
+      "occupancy": 0.25,
+      "programs": 1024,
+      "smBalance": 0.9846153846153847,
+      "rules": [
+        "TL009"
+      ]
+    },
+    {
+      "case": "matmul 2048^3 fp16",
+      "variant": "64x64x64 w4 s2",
+      "ms": 2.3316924571990967,
+      "speedup": 1.0837621156284258,
+      "rate": "7.37 TFLOP/s",
+      "blocksPerSm": 4,
+      "occupancy": 0.3333333333333333,
+      "programs": 1024,
+      "smBalance": 0.9846153846153847,
+      "rules": []
+    },
+    {
+      "case": "row sum 8 x 4M fp32",
+      "variant": "1 program per row (flagged)",
+      "ms": 1.3715261220932007,
+      "speedup": 1.0,
+      "rate": "98 GB/s",
+      "blocksPerSm": 12,
+      "occupancy": 1.0,
+      "programs": 8,
+      "smBalance": 0.4,
+      "rules": [
+        "TL008"
+      ]
+    },
+    {
+      "case": "row sum 8 x 4M fp32",
+      "variant": "split 5 per row (40 programs)",
+      "ms": 0.7605431079864502,
+      "speedup": 1.8033509313158298,
+      "rate": "176 GB/s",
+      "blocksPerSm": 12,
+      "occupancy": 1.0,
+      "programs": 40,
+      "smBalance": 1.0,
+      "rules": []
+    },
+    {
+      "case": "row sum 8 x 4M fp32",
+      "variant": "split 20 per row (160 programs)",
+      "ms": 0.7679193615913391,
+      "speedup": 1.7860288341356874,
+      "rate": "175 GB/s",
+      "blocksPerSm": 12,
+      "occupancy": 1.0,
+      "programs": 160,
+      "smBalance": 1.0,
+      "rules": []
+    }
+  ]
+}

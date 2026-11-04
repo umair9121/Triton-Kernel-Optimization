@@ -41,7 +41,8 @@ target-version = "py310"
 src = ["src", "examples"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["tritonlens", "bad_access", "layernorm", "matmul", "softmax", "transpose",
+known-first-party = ["tritonlens", "bad_access", "big_gpu_configs", "layernorm", "matmul",
+                     "softmax", "transpose",
                      "vector_add"]
 known-third-party = ["torch", "triton"]
 

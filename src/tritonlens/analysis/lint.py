@@ -7,7 +7,13 @@ TL003  shared-memory bank conflicts
 TL004  ``convert_layout`` that round-trips through shared memory
 TL005  wasted threads: layout replication or mostly-masked tiles
 TL006  launch arguments that defeat Triton's alignment specialization
+TL007  register spills or occupancy too low to hide memory latency
+TL008  SM load imbalance: the grid does not divide evenly over the SMs
+TL009  shared memory (pipeline stages) limits blocks per SM
 =====  ========================================================================
+
+TL007-TL009 depend on the target GPU (``Analysis.device``): the same kernel can be fine on a
+108-SM A100 and leave a 20-SM laptop GPU half idle.
 """
 
 from __future__ import annotations
@@ -30,6 +36,9 @@ RULES = {
     "TL004": "Layout conversion through shared memory",
     "TL005": "Wasted threads",
     "TL006": "Launch argument defeats alignment specialization",
+    "TL007": "Register pressure / low occupancy",
+    "TL008": "SM load imbalance",
+    "TL009": "Shared memory limits occupancy",
 }
 
 
@@ -329,7 +338,148 @@ def rule_tl006(an: Analysis) -> list[Finding]:
     return findings
 
 
-ALL_RULES = [rule_tl001, rule_tl002, rule_tl003, rule_tl004, rule_tl005, rule_tl006]
+def _anchor(an: Analysis) -> Op | None:
+    """Op to attach whole-kernel findings to: the main dot, else the largest store."""
+    from .tiling import _main_store
+
+    dots = an.func.find("dot")
+    if dots:
+        return dots[0]
+    return _main_store(an.func) or next(
+        (op for op in an.func.ops if op.is_("store", "load") and op.loc is not None), None)
+
+
+def _gpu(an: Analysis) -> str:
+    dev = an.perf.device
+    return f"{dev.name} ({dev.sm_count} SMs, sm_{dev.arch})"
+
+
+def rule_tl007(an: Analysis) -> list[Finding]:
+    perf = an.perf
+    occ = perf.occupancy
+    if occ is None:
+        return []
+    out = []
+    spills = int(an.metadata.get("n_spills") or 0)
+    if spills:
+        out.append(Finding(
+            "TL007", "warning",
+            f"Registers spill: {spills} bytes of local memory per thread at "
+            f"{occ.regs_per_thread} registers/thread. Spills go through L1/L2 and, on a 2 MB "
+            "L2, often to DRAM.", _anchor(an),
+            "reduce the tile size or num_stages, or raise num_warps so each thread holds "
+            "fewer accumulator elements", {"spills": spills}))
+    pct = occ.occupancy
+    dev = perf.device
+    limiter = (f"limited by {occ.limiter}: {occ.blocks_per_sm} block(s) of {occ.num_warps} "
+               f"warps = {occ.active_warps}/{occ.max_warps_per_sm} warps per SM")
+    nxt = perf.regs_needed_for_next_block
+    hint = (f"; at <= {nxt} registers/thread (now {occ.regs_per_thread}) one more block fits"
+            if nxt else "")
+    if not perf.has_dot and pct < 0.25:
+        out.append(Finding(
+            "TL007", "warning",
+            f"Occupancy {pct:.0%} on {_gpu(an)} ({limiter}{hint}). Memory-bound kernels need "
+            "many warps in flight to hide DRAM latency.", _anchor(an),
+            "lower the per-thread work (smaller BLOCK or more warps) or reduce shared memory",
+            {"occupancy": pct, "limiter": occ.limiter, "regsForNextBlock": nxt}))
+    elif perf.has_dot and occ.blocks_per_sm == 1 and occ.active_warps <= 8:
+        out.append(Finding(
+            "TL007", "info",
+            f"Only {occ.active_warps} warps per SM on {_gpu(an)} ({limiter}{hint}). Large "
+            "matmul tiles rely on instruction-level parallelism; with one block per SM there "
+            f"is no other block to overlap its prologue/epilogue, and on {dev.sm_count} SMs "
+            "the grid also becomes coarse (see TL008).", _anchor(an),
+            "try a smaller tile (e.g. 64x64 or 64x128) that fits 2+ blocks per SM",
+            {"occupancy": pct, "limiter": occ.limiter, "regsForNextBlock": nxt}))
+    return out
+
+
+def rule_tl008(an: Analysis) -> list[Finding]:
+    perf = an.perf
+    w = perf.waves
+    if w is None:
+        return []
+    sms = w.sm_count
+    if w.total_blocks < sms:
+        idle = sms - w.total_blocks
+        sev = "warning" if w.total_blocks <= sms // 2 else "info"
+        return [Finding(
+            "TL008", sev,
+            f"The grid has {w.total_blocks} programs for {sms} SMs on {_gpu(an)}: {idle} SMs "
+            f"stay idle ({idle / sms:.0%} of the GPU).", _anchor(an),
+            "use smaller blocks so the grid has at least one program per SM (ideally several), "
+            "or split the reduction dimension (split-K)",
+            {"programs": w.total_blocks, "smCount": sms, "balance": w.sm_balance})]
+    balance = w.sm_balance
+    # Only work-heavy programs make the imbalance visible; memory-bound kernels with many
+    # small programs are balanced by the hardware scheduler.
+    if not perf.has_dot or balance >= 0.85:
+        return []
+    per_sm = -(-w.total_blocks // sms)
+    msg = (f"{w.total_blocks} equal-work programs on {sms} SMs: some SMs run {per_sm} programs "
+           f"while others run {per_sm - 1}, so the kernel takes as long as "
+           f"{per_sm * sms} programs would ({balance:.0%} SM utilization). Measured on an "
+           "RTX 3050 Ti: going from 20 to 21 matmul tiles doubles run time "
+           "(benchmarks/waves.py).")
+    better = []
+    for factor, how in ((2, "halve BLOCK_M or BLOCK_N"), (4, "halve both")):
+        t = w.total_blocks * factor
+        b = t / (-(-t // sms) * sms)
+        if b > balance + 0.05:
+            better.append(f"{how} -> {t} programs, {b:.0%} utilization")
+    return [Finding("TL008", "warning" if balance < 0.7 else "info", msg, _anchor(an),
+                    "; ".join(better) or f"make the number of programs a multiple of {sms}",
+                    {"programs": w.total_blocks, "smCount": sms, "balance": balance})]
+
+
+def rule_tl009(an: Analysis) -> list[Finding]:
+    from .occupancy import occupancy
+    from .perf import pipeline_buffer_bytes
+
+    perf = an.perf
+    occ = perf.occupancy
+    stages = int(an.metadata.get("num_stages") or 0)
+    # Past 2 blocks/SM, trading stages for occupancy measured within noise
+    # (benchmarks/device_rules.py); 1 -> 2 blocks gave 9%.
+    if occ is None or occ.limiter != "shared memory" or stages < 3 or not occ.shared_bytes \
+            or occ.blocks_per_sm > 2:
+        return []
+    per_stage = pipeline_buffer_bytes(an.func, stages)
+    if not per_stage:
+        return []
+    # The allocator overlaps epilogue scratch with the (dead) pipeline buffers, so the total is
+    # max(pipeline, scratch): anything above the pipeline buffers is scratch that stays.
+    other = occ.shared_bytes if occ.shared_bytes > per_stage * (stages - 1) else 0
+    options = []
+    best = occ.blocks_per_sm
+    for s in range(stages - 1, 1, -1):
+        smem = max(other, per_stage * (s - 1))
+        o = occupancy(perf.device, occ.num_warps, occ.regs_per_thread, smem)
+        if o.blocks_per_sm > best:
+            options.append((s, smem, o))
+            best = o.blocks_per_sm
+    if not options:
+        return []
+    lim = perf.device.limits
+    alts = ", ".join(f"num_stages={s} (~{smem // 1024} KiB): {o.blocks_per_sm} blocks "
+                     f"({o.occupancy:.0%})" for s, smem, o in options)
+    return [Finding(
+        "TL009", "info",
+        f"num_stages={stages} buffers {per_stage * (stages - 1) // 1024} KiB of operand tiles "
+        f"({occ.shared_bytes // 1024} KiB shared memory per block); {_gpu(an)} has "
+        f"{lim.shared_per_sm // 1024} KiB per SM, so only {occ.blocks_per_sm} block(s) fit "
+        f"({occ.occupancy:.0%} occupancy). Fewer stages: {alts}. Configs tuned on "
+        "164-228 KiB parts often overshoot here.",
+        _anchor(an), "benchmark the listed num_stages values; deeper pipelines only pay off if "
+        "they do not cost occupancy",
+        {"stages": stages, "blocksPerSm": occ.blocks_per_sm,
+         "options": [{"stages": s, "shared": smem, "blocksPerSm": o.blocks_per_sm}
+                     for s, smem, o in options]})]
+
+
+ALL_RULES = [rule_tl001, rule_tl002, rule_tl003, rule_tl004, rule_tl005, rule_tl006,
+             rule_tl007, rule_tl008, rule_tl009]
 
 
 def _dedupe(findings: list[Finding]) -> list[Finding]:
