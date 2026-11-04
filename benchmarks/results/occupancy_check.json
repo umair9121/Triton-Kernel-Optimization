@@ -1,0 +1,2073 @@
+{
+  "device": "NVIDIA GeForce RTX 3050 Ti Laptop GPU",
+  "rows": [
+    {
+      "config": "matmul 32x32x32 w2 s2",
+      "regs": 72,
+      "shared": 4096,
+      "predicted": 14,
+      "driver": 14,
+      "limiter": "registers",
+      "occupancy": 0.5833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w2 s3",
+      "regs": 72,
+      "shared": 8192,
+      "predicted": 11,
+      "driver": 11,
+      "limiter": "shared memory",
+      "occupancy": 0.4583333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w2 s4",
+      "regs": 72,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "shared memory",
+      "occupancy": 0.2916666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w2 s5",
+      "regs": 72,
+      "shared": 16384,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.20833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w4 s2",
+      "regs": 48,
+      "shared": 4096,
+      "predicted": 10,
+      "driver": 10,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w4 s3",
+      "regs": 54,
+      "shared": 8192,
+      "predicted": 9,
+      "driver": 9,
+      "limiter": "registers",
+      "occupancy": 0.75,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w4 s4",
+      "regs": 54,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "shared memory",
+      "occupancy": 0.5833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w4 s5",
+      "regs": 54,
+      "shared": 16384,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w8 s2",
+      "regs": 40,
+      "shared": 4096,
+      "predicted": 6,
+      "driver": 6,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w8 s3",
+      "regs": 46,
+      "shared": 8192,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w8 s4",
+      "regs": 46,
+      "shared": 12288,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x32 w8 s5",
+      "regs": 46,
+      "shared": 16384,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w2 s2",
+      "regs": 80,
+      "shared": 8192,
+      "predicted": 11,
+      "driver": 11,
+      "limiter": "shared memory",
+      "occupancy": 0.4583333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w2 s3",
+      "regs": 80,
+      "shared": 16384,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.20833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w2 s4",
+      "regs": 80,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w2 s5",
+      "regs": 80,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.125,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w4 s2",
+      "regs": 56,
+      "shared": 8192,
+      "predicted": 9,
+      "driver": 9,
+      "limiter": "registers",
+      "occupancy": 0.75,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w4 s3",
+      "regs": 56,
+      "shared": 16384,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w4 s4",
+      "regs": 56,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w4 s5",
+      "regs": 56,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w8 s2",
+      "regs": 44,
+      "shared": 8192,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w8 s3",
+      "regs": 41,
+      "shared": 16384,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w8 s4",
+      "regs": 42,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x32x64 w8 s5",
+      "regs": 41,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w2 s2",
+      "regs": 108,
+      "shared": 6144,
+      "predicted": 8,
+      "driver": 8,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w2 s3",
+      "regs": 112,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "shared memory",
+      "occupancy": 0.2916666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w2 s4",
+      "regs": 112,
+      "shared": 18432,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.20833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w2 s5",
+      "regs": 112,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w4 s2",
+      "regs": 72,
+      "shared": 6144,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "registers",
+      "occupancy": 0.5833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w4 s3",
+      "regs": 72,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "registers",
+      "occupancy": 0.5833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w4 s4",
+      "regs": 72,
+      "shared": 18432,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w4 s5",
+      "regs": 72,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w8 s2",
+      "regs": 46,
+      "shared": 6144,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w8 s3",
+      "regs": 54,
+      "shared": 12288,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w8 s4",
+      "regs": 54,
+      "shared": 18432,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x32 w8 s5",
+      "regs": 54,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w2 s2",
+      "regs": 128,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "shared memory",
+      "occupancy": 0.2916666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w2 s3",
+      "regs": 128,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w2 s4",
+      "regs": 128,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w2 s5",
+      "regs": 128,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w4 s2",
+      "regs": 72,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "registers",
+      "occupancy": 0.5833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w4 s3",
+      "regs": 72,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w4 s4",
+      "regs": 72,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w4 s5",
+      "regs": 72,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w8 s2",
+      "regs": 48,
+      "shared": 12288,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w8 s3",
+      "regs": 58,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w8 s4",
+      "regs": 58,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x64x64 w8 s5",
+      "regs": 58,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w2 s2",
+      "regs": 168,
+      "shared": 10240,
+      "predicted": 6,
+      "driver": 6,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w2 s3",
+      "regs": 196,
+      "shared": 20480,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w2 s4",
+      "regs": 206,
+      "shared": 30720,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.125,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w2 s5",
+      "regs": 196,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w4 s2",
+      "regs": 96,
+      "shared": 10240,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w4 s3",
+      "regs": 112,
+      "shared": 20480,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w4 s4",
+      "regs": 112,
+      "shared": 30720,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w4 s5",
+      "regs": 112,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w8 s2",
+      "regs": 76,
+      "shared": 10240,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w8 s3",
+      "regs": 78,
+      "shared": 20480,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w8 s4",
+      "regs": 78,
+      "shared": 30720,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x32 w8 s5",
+      "regs": 78,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w2 s2",
+      "regs": 224,
+      "shared": 20480,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w2 s3",
+      "regs": 232,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w2 s4",
+      "regs": 252,
+      "shared": 61440,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.041666666666666664,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w2 s5",
+      "regs": 232,
+      "shared": 81920,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.041666666666666664,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w4 s2",
+      "regs": 128,
+      "shared": 20480,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w4 s3",
+      "regs": 128,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w4 s4",
+      "regs": 128,
+      "shared": 61440,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w4 s5",
+      "regs": 128,
+      "shared": 81920,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w8 s2",
+      "regs": 76,
+      "shared": 20480,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w8 s3",
+      "regs": 80,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w8 s4",
+      "regs": 80,
+      "shared": 61440,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 32x128x64 w8 s5",
+      "regs": 80,
+      "shared": 81920,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w2 s2",
+      "regs": 96,
+      "shared": 6144,
+      "predicted": 10,
+      "driver": 10,
+      "limiter": "registers",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w2 s3",
+      "regs": 112,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "shared memory",
+      "occupancy": 0.2916666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w2 s4",
+      "regs": 112,
+      "shared": 18432,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.20833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w2 s5",
+      "regs": 112,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w4 s2",
+      "regs": 64,
+      "shared": 6144,
+      "predicted": 8,
+      "driver": 8,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w4 s3",
+      "regs": 64,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "shared memory",
+      "occupancy": 0.5833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w4 s4",
+      "regs": 66,
+      "shared": 18432,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w4 s5",
+      "regs": 64,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w8 s2",
+      "regs": 47,
+      "shared": 6144,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w8 s3",
+      "regs": 56,
+      "shared": 12288,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w8 s4",
+      "regs": 56,
+      "shared": 18432,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x32 w8 s5",
+      "regs": 56,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w2 s2",
+      "regs": 128,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "shared memory",
+      "occupancy": 0.2916666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w2 s3",
+      "regs": 128,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w2 s4",
+      "regs": 128,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w2 s5",
+      "regs": 128,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w4 s2",
+      "regs": 72,
+      "shared": 12288,
+      "predicted": 7,
+      "driver": 7,
+      "limiter": "registers",
+      "occupancy": 0.5833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w4 s3",
+      "regs": 72,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w4 s4",
+      "regs": 72,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w4 s5",
+      "regs": 72,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w8 s2",
+      "regs": 51,
+      "shared": 12288,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w8 s3",
+      "regs": 58,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w8 s4",
+      "regs": 58,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x32x64 w8 s5",
+      "regs": 58,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w2 s2",
+      "regs": 164,
+      "shared": 8192,
+      "predicted": 6,
+      "driver": 6,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w2 s3",
+      "regs": 168,
+      "shared": 16384,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "shared memory",
+      "occupancy": 0.20833333333333334,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w2 s4",
+      "regs": 168,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w2 s5",
+      "regs": 168,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.125,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w4 s2",
+      "regs": 96,
+      "shared": 8192,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w4 s3",
+      "regs": 96,
+      "shared": 16384,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w4 s4",
+      "regs": 96,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w4 s5",
+      "regs": 96,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w8 s2",
+      "regs": 62,
+      "shared": 9216,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w8 s3",
+      "regs": 64,
+      "shared": 16384,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w8 s4",
+      "regs": 64,
+      "shared": 24576,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x32 w8 s5",
+      "regs": 64,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w2 s2",
+      "regs": 200,
+      "shared": 16384,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w2 s3",
+      "regs": 202,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.125,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w2 s4",
+      "regs": 202,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w2 s5",
+      "regs": 202,
+      "shared": 65536,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.041666666666666664,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w4 s2",
+      "regs": 116,
+      "shared": 16384,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w4 s3",
+      "regs": 124,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w4 s4",
+      "regs": 128,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w4 s5",
+      "regs": 124,
+      "shared": 65536,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w8 s2",
+      "regs": 78,
+      "shared": 16384,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w8 s3",
+      "regs": 78,
+      "shared": 32768,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w8 s4",
+      "regs": 78,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x64x64 w8 s5",
+      "regs": 78,
+      "shared": 65536,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x32 w4 s2",
+      "regs": 162,
+      "shared": 12288,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x32 w4 s3",
+      "regs": 168,
+      "shared": 24576,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x32 w4 s4",
+      "regs": 168,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x32 w4 s5",
+      "regs": 168,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x32 w8 s2",
+      "regs": 100,
+      "shared": 12288,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x32 w8 s3",
+      "regs": 108,
+      "shared": 24576,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x32 w8 s4",
+      "regs": 108,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x32 w8 s5",
+      "regs": 108,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x64 w4 s2",
+      "regs": 168,
+      "shared": 24576,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x64 w4 s3",
+      "regs": 168,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x64 w4 s4",
+      "regs": 168,
+      "shared": 73728,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x64 w4 s5",
+      "regs": 168,
+      "shared": 98304,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x64 w8 s2",
+      "regs": 112,
+      "shared": 24576,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x64 w8 s3",
+      "regs": 120,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x64 w8 s4",
+      "regs": 124,
+      "shared": 73728,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 64x128x64 w8 s5",
+      "regs": 120,
+      "shared": 98304,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w2 s2",
+      "regs": 168,
+      "shared": 10240,
+      "predicted": 6,
+      "driver": 6,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w2 s3",
+      "regs": 168,
+      "shared": 20480,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w2 s4",
+      "regs": 168,
+      "shared": 30720,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.125,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w2 s5",
+      "regs": 168,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w4 s2",
+      "regs": 94,
+      "shared": 10240,
+      "predicted": 5,
+      "driver": 5,
+      "limiter": "registers",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w4 s3",
+      "regs": 96,
+      "shared": 20480,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w4 s4",
+      "regs": 96,
+      "shared": 30720,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "shared memory",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w4 s5",
+      "regs": 96,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w8 s2",
+      "regs": 64,
+      "shared": 10240,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w8 s3",
+      "regs": 74,
+      "shared": 20480,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w8 s4",
+      "regs": 75,
+      "shared": 30720,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x32 w8 s5",
+      "regs": 74,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w2 s2",
+      "regs": 196,
+      "shared": 20480,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w2 s3",
+      "regs": 202,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w2 s4",
+      "regs": 206,
+      "shared": 61440,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.041666666666666664,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w2 s5",
+      "regs": 202,
+      "shared": 81920,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.041666666666666664,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w4 s2",
+      "regs": 128,
+      "shared": 20480,
+      "predicted": 4,
+      "driver": 4,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w4 s3",
+      "regs": 128,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w4 s4",
+      "regs": 128,
+      "shared": 61440,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w4 s5",
+      "regs": 128,
+      "shared": 81920,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w8 s2",
+      "regs": 70,
+      "shared": 20480,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.5,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w8 s3",
+      "regs": 74,
+      "shared": 40960,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w8 s4",
+      "regs": 74,
+      "shared": 61440,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x32x64 w8 s5",
+      "regs": 74,
+      "shared": 81920,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x32 w4 s2",
+      "regs": 158,
+      "shared": 12288,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x32 w4 s3",
+      "regs": 168,
+      "shared": 24576,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x32 w4 s4",
+      "regs": 168,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x32 w4 s5",
+      "regs": 168,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x32 w8 s2",
+      "regs": 94,
+      "shared": 12288,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x32 w8 s3",
+      "regs": 106,
+      "shared": 24576,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x32 w8 s4",
+      "regs": 104,
+      "shared": 36864,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x32 w8 s5",
+      "regs": 106,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x64 w4 s2",
+      "regs": 168,
+      "shared": 24576,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x64 w4 s3",
+      "regs": 168,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x64 w4 s4",
+      "regs": 168,
+      "shared": 73728,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x64 w4 s5",
+      "regs": 168,
+      "shared": 98304,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x64 w8 s2",
+      "regs": 116,
+      "shared": 24576,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x64 w8 s3",
+      "regs": 122,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x64 w8 s4",
+      "regs": 122,
+      "shared": 73728,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x64x64 w8 s5",
+      "regs": 122,
+      "shared": 98304,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x32 w4 s2",
+      "regs": 246,
+      "shared": 16384,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x32 w4 s3",
+      "regs": 254,
+      "shared": 32768,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x32 w4 s4",
+      "regs": 254,
+      "shared": 49152,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x32 w4 s5",
+      "regs": 254,
+      "shared": 65536,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x32 w8 s2",
+      "regs": 150,
+      "shared": 17408,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x32 w8 s3",
+      "regs": 166,
+      "shared": 32768,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x32 w8 s4",
+      "regs": 168,
+      "shared": 49152,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x32 w8 s5",
+      "regs": 166,
+      "shared": 65536,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x64 w4 s2",
+      "regs": 254,
+      "shared": 32768,
+      "predicted": 2,
+      "driver": 2,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x64 w4 s3",
+      "regs": 255,
+      "shared": 65536,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x64 w4 s4",
+      "regs": 255,
+      "shared": 98304,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "shared memory",
+      "occupancy": 0.08333333333333333,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x64 w4 s5",
+      "regs": null,
+      "shared": 131072,
+      "predicted": 0,
+      "driver": 0,
+      "limiter": "does not fit",
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x64 w8 s2",
+      "regs": 166,
+      "shared": 32768,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x64 w8 s3",
+      "regs": 172,
+      "shared": 65536,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x64 w8 s4",
+      "regs": 176,
+      "shared": 98304,
+      "predicted": 1,
+      "driver": 1,
+      "limiter": "registers",
+      "occupancy": 0.16666666666666666,
+      "match": true
+    },
+    {
+      "config": "matmul 128x128x64 w8 s5",
+      "regs": null,
+      "shared": 131072,
+      "predicted": 0,
+      "driver": 0,
+      "limiter": "does not fit",
+      "match": true
+    },
+    {
+      "config": "softmax 1024 w1",
+      "regs": 71,
+      "shared": 0,
+      "predicted": 16,
+      "driver": 16,
+      "limiter": "block slots",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "softmax 1024 w2",
+      "regs": 33,
+      "shared": 8,
+      "predicted": 16,
+      "driver": 16,
+      "limiter": "block slots",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "softmax 1024 w4",
+      "regs": 25,
+      "shared": 16,
+      "predicted": 12,
+      "driver": 12,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    },
+    {
+      "config": "softmax 1024 w8",
+      "regs": 20,
+      "shared": 32,
+      "predicted": 6,
+      "driver": 6,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    },
+    {
+      "config": "softmax 1024 w16",
+      "regs": 20,
+      "shared": 64,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    },
+    {
+      "config": "softmax 2048 w1",
+      "regs": 92,
+      "shared": 0,
+      "predicted": 16,
+      "driver": 16,
+      "limiter": "block slots",
+      "occupancy": 0.3333333333333333,
+      "match": true
+    },
+    {
+      "config": "softmax 2048 w2",
+      "regs": 52,
+      "shared": 8,
+      "predicted": 16,
+      "driver": 16,
+      "limiter": "block slots",
+      "occupancy": 0.6666666666666666,
+      "match": true
+    },
+    {
+      "config": "softmax 2048 w4",
+      "regs": 33,
+      "shared": 16,
+      "predicted": 12,
+      "driver": 12,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    },
+    {
+      "config": "softmax 2048 w8",
+      "regs": 25,
+      "shared": 32,
+      "predicted": 6,
+      "driver": 6,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    },
+    {
+      "config": "softmax 2048 w16",
+      "regs": 20,
+      "shared": 64,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    },
+    {
+      "config": "softmax 4096 w1",
+      "regs": 168,
+      "shared": 0,
+      "predicted": 12,
+      "driver": 12,
+      "limiter": "registers",
+      "occupancy": 0.25,
+      "match": true
+    },
+    {
+      "config": "softmax 4096 w2",
+      "regs": 92,
+      "shared": 8,
+      "predicted": 10,
+      "driver": 10,
+      "limiter": "registers",
+      "occupancy": 0.4166666666666667,
+      "match": true
+    },
+    {
+      "config": "softmax 4096 w4",
+      "regs": 48,
+      "shared": 16,
+      "predicted": 10,
+      "driver": 10,
+      "limiter": "registers",
+      "occupancy": 0.8333333333333334,
+      "match": true
+    },
+    {
+      "config": "softmax 4096 w8",
+      "regs": 33,
+      "shared": 32,
+      "predicted": 6,
+      "driver": 6,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    },
+    {
+      "config": "softmax 4096 w16",
+      "regs": 25,
+      "shared": 64,
+      "predicted": 3,
+      "driver": 3,
+      "limiter": "warps",
+      "occupancy": 1.0,
+      "match": true
+    }
+  ]
+}
