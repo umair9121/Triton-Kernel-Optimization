@@ -1,0 +1,236 @@
+{
+  "device": "NVIDIA GeForce RTX 3050 Ti Laptop GPU",
+  "size": 2048,
+  "rows": [
+    {
+      "config": "64x64x32 w4 s3",
+      "variant": "triton default",
+      "correct": true,
+      "ldmatrix_ptx": 12,
+      "wavefronts_per_iter": 192,
+      "ideal_per_iter": 192,
+      "degree": 1.0,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 1.0,
+        "ldmatrix.x4.trans": 1.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 2, maxPhase = 4, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 8, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.1744900941848755,
+      "ms_min": 1.1571389436721802,
+      "ms_max": 1.2065885066986084,
+      "tflops": 14.627513053588796,
+      "slowdown": 1.0
+    },
+    {
+      "config": "64x64x32 w4 s3",
+      "variant": "maxPhase=2",
+      "correct": true,
+      "ldmatrix_ptx": 12,
+      "wavefronts_per_iter": 448,
+      "ideal_per_iter": 192,
+      "degree": 2.3333333333333335,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 2.0,
+        "ldmatrix.x4.trans": 4.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 2, maxPhase = 2, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 2, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.2323106527328491,
+      "ms_min": 1.1903902292251587,
+      "ms_max": 1.2748420238494873,
+      "tflops": 13.941183699013594,
+      "slowdown": 1.0492303501189617
+    },
+    {
+      "config": "64x64x32 w4 s3",
+      "variant": "A unswizzled",
+      "correct": true,
+      "ldmatrix_ptx": 12,
+      "wavefronts_per_iter": 384,
+      "ideal_per_iter": 192,
+      "degree": 2.0,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 4.0,
+        "ldmatrix.x4.trans": 1.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 1, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 8, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.1965060234069824,
+      "ms_min": 1.1876503229141235,
+      "ms_max": 1.2154686450958252,
+      "tflops": 14.358364143526252,
+      "slowdown": 1.0187450957067343
+    },
+    {
+      "config": "64x64x32 w4 s3",
+      "variant": "B unswizzled",
+      "correct": true,
+      "ldmatrix_ptx": 12,
+      "wavefronts_per_iter": 640,
+      "ideal_per_iter": 192,
+      "degree": 3.3333333333333335,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 1.0,
+        "ldmatrix.x4.trans": 8.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 2, maxPhase = 4, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 1, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.6059588193893433,
+      "ms_min": 1.5779404640197754,
+      "ms_max": 1.6360905170440674,
+      "tflops": 10.697577656774877,
+      "slowdown": 1.3673668491039233
+    },
+    {
+      "config": "64x64x32 w4 s3",
+      "variant": "no swizzle",
+      "correct": true,
+      "ldmatrix_ptx": 12,
+      "wavefronts_per_iter": 832,
+      "ideal_per_iter": 192,
+      "degree": 4.333333333333333,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 4.0,
+        "ldmatrix.x4.trans": 8.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 1, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 1, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 2.034346342086792,
+      "ms_min": 2.002236843109131,
+      "ms_max": 2.0483169555664062,
+      "tflops": 8.444908729934959,
+      "slowdown": 1.732110259728225
+    },
+    {
+      "config": "128x128x32 w4 s3",
+      "variant": "triton default",
+      "correct": true,
+      "ldmatrix_ptx": 24,
+      "wavefronts_per_iter": 384,
+      "ideal_per_iter": 384,
+      "degree": 1.0,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 1.0,
+        "ldmatrix.x4.trans": 1.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 2, maxPhase = 4, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 8, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.215032935142517,
+      "ms_min": 1.1576972007751465,
+      "ms_max": 2.4345061779022217,
+      "tflops": 14.139426748942316,
+      "slowdown": 1.0
+    },
+    {
+      "config": "128x128x32 w4 s3",
+      "variant": "maxPhase=2",
+      "correct": true,
+      "ldmatrix_ptx": 24,
+      "wavefronts_per_iter": 896,
+      "ideal_per_iter": 384,
+      "degree": 2.3333333333333335,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 2.0,
+        "ldmatrix.x4.trans": 4.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 2, maxPhase = 2, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 2, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.200263261795044,
+      "ms_min": 1.1745280027389526,
+      "ms_max": 2.399289131164551,
+      "tflops": 14.313417506678315,
+      "slowdown": 0.9878442197571041
+    },
+    {
+      "config": "128x128x32 w4 s3",
+      "variant": "A unswizzled",
+      "correct": true,
+      "ldmatrix_ptx": 24,
+      "wavefronts_per_iter": 768,
+      "ideal_per_iter": 384,
+      "degree": 2.0,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 4.0,
+        "ldmatrix.x4.trans": 1.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 1, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 8, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.1882057189941406,
+      "ms_min": 1.166847825050354,
+      "ms_max": 2.3022408485412598,
+      "tflops": 14.458665624453806,
+      "slowdown": 0.9779205852183507
+    },
+    {
+      "config": "128x128x32 w4 s3",
+      "variant": "B unswizzled",
+      "correct": true,
+      "ldmatrix_ptx": 24,
+      "wavefronts_per_iter": 1280,
+      "ideal_per_iter": 384,
+      "degree": 3.3333333333333335,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 1.0,
+        "ldmatrix.x4.trans": 8.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 2, maxPhase = 4, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 1, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.2052838802337646,
+      "ms_min": 1.1508114337921143,
+      "ms_max": 2.227280855178833,
+      "tflops": 14.253794865876715,
+      "slowdown": 0.9919763039940898
+    },
+    {
+      "config": "128x128x32 w4 s3",
+      "variant": "no swizzle",
+      "correct": true,
+      "ldmatrix_ptx": 24,
+      "wavefronts_per_iter": 1664,
+      "ideal_per_iter": 384,
+      "degree": 4.333333333333333,
+      "worst_by_mechanism": {
+        "ldmatrix.x4": 4.0,
+        "ldmatrix.x4.trans": 8.0,
+        "cp.async (16B)": 1.0
+      },
+      "shared": [
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 1, order = [1, 0], hasLeadingOffset = false}>",
+        "#triton_gpu.shared<{vec = 8, perPhase = 1, maxPhase = 1, order = [1, 0], hasLeadingOffset = false}>"
+      ],
+      "ms": 1.2902400493621826,
+      "ms_min": 1.1770601272583008,
+      "ms_max": 2.2101070880889893,
+      "tflops": 13.315250284234082,
+      "slowdown": 1.0618971815861469
+    }
+  ]
+}
