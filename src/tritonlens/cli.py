@@ -23,9 +23,10 @@ from .output import format_text, to_json, to_sarif
 from .report import build_report, write_html
 
 
-def _load_kernels(target: Path, script_args: list[str]) -> list[CapturedKernel]:
+def _load_kernels(target: Path, script_args: list[str], time: bool = False
+                  ) -> list[CapturedKernel]:
     if target.suffix == ".py":
-        return capture_script(target, script_args)
+        return capture_script(target, script_args, time=time)
     if target.suffix == ".ttgir":
         return [CapturedKernel.from_files(target)]
     if target.is_dir():
@@ -93,7 +94,7 @@ border-bottom:1px solid #2a3142;text-align:left}}th{{color:#8b95a7;font-weight:5
 
 
 def cmd_run(args) -> int:
-    kernels = capture_script(Path(args.script), args.script_args)
+    kernels = capture_script(Path(args.script), args.script_args, time=args.time)
     if not kernels:
         print("tritonlens: the script did not launch any Triton kernel", file=sys.stderr)
         return 1
@@ -127,7 +128,7 @@ def cmd_analyze(args) -> int:
 
 
 def cmd_lint(args) -> int:
-    results = _analyze_all(_load_kernels(Path(args.target), args.script_args))
+    results = _analyze_all(_load_kernels(Path(args.target), args.script_args, args.time))
     by_kernel: dict[str, list[Finding]] = {}
     for an, findings in results:
         limit = SEVERITY_ORDER[args.min_severity]
@@ -174,6 +175,10 @@ def cmd_device(args) -> int:
     return 0
 
 
+TIME_HELP = ("replay each kernel's first launch to measure it (roofline %%); replays repeat side "
+             "effects, so avoid it for kernels that update inputs in place")
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="tritonlens", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -184,6 +189,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("script")
     run.add_argument("-o", "--output", default="reports", help="output directory")
     run.add_argument("--save-ir", action="store_true", help="also save every IR stage")
+    run.add_argument("--time", action="store_true", help=TIME_HELP)
     run.set_defaults(func=cmd_run)
 
     an = sub.add_parser("analyze", help="analyze a .ttgir file or a directory of captured IR")
@@ -202,6 +208,7 @@ def build_parser() -> argparse.ArgumentParser:
     lint.add_argument("--fail-on", choices=["error", "warning", "info"],
                       help="exit with status 2 if a finding at this severity or worse exists")
     lint.add_argument("-o", "--output", help="write to a file instead of stdout")
+    lint.add_argument("--time", action="store_true", help=TIME_HELP)
     lint.set_defaults(func=cmd_lint)
 
     val = sub.add_parser("validate", help="check the layout models against this GPU")

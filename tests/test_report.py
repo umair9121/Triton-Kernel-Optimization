@@ -35,6 +35,10 @@ def test_report_contents_matmul():
     assert all(a["bufferId"] in buffers for a in data["shared"]["accesses"])
     assert data["tiling"]["tileShape"] == [64, 64]
     assert data["source"]["lines"] is not None
+    perf = data["perf"]
+    assert perf["occupancy"]["blocks_per_sm"] == 5
+    assert perf["waves"]["total_blocks"] == 256
+    assert perf["roofline"]["flops"] == 2 * 1024 ** 3
 
 
 def test_html_is_self_contained():

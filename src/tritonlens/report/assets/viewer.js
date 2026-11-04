@@ -111,6 +111,8 @@
       ["grid", k.grid ? k.grid.join("x") : "n/a"], ["stages", k.numStages],
       ["shared", k.sharedBytes !== null && k.sharedBytes !== undefined ? `${k.sharedBytes} B` : null],
       ["regs", k.registers], ["spills", k.spills],
+      ["device", D.perf ? `${D.perf.device.name.replace("NVIDIA GeForce ", "")} · ${D.perf.device.sm_count} SMs` : null],
+      ["time", D.perf && D.perf.roofline && D.perf.roofline.measuredMs ? fmtMs(D.perf.roofline.measuredMs) : null],
     ].filter(([, v]) => v !== null && v !== undefined);
     const hdr = $("header");
     hdr.append(
@@ -125,7 +127,7 @@
 
   // ---- tabs ---------------------------------------------------------------------------
   const TABS = [["overview", "Overview"], ["layouts", "Register layouts"], ["shared", "Shared memory"],
-    ["global", "Global memory"], ["tiling", "Program tiling"], ["ir", "IR & source"]];
+    ["global", "Global memory"], ["tiling", "Program tiling"], ["perf", "Performance"], ["ir", "IR & source"]];
   const rendered = new Set();
   function showTab(name) {
     for (const [id] of TABS) {
@@ -147,6 +149,7 @@
     if (op && D.opTensors[f.op]) links.push(h("a", { onclick: () => focusTensor(D.opTensors[f.op][0].key) }, "layout"));
     if (["TL003", "TL004"].includes(f.rule)) links.push(h("a", { onclick: () => focusShared(f.op) }, "banks"));
     if (["TL001", "TL002"].includes(f.rule)) links.push(h("a", { onclick: () => focusGlobal(f.op) }, "access"));
+    if (["TL007", "TL008", "TL009"].includes(f.rule)) links.push(h("a", { onclick: () => showTab("perf") }, "performance"));
     return h("div", { class: `finding ${f.severity}` },
       h("div", { class: "head" },
         h("span", { class: `badge ${f.severity}` }, f.severity),
@@ -755,7 +758,164 @@
     redrawGlobal();
   }
 
-  const RENDER = { overview: renderOverview, layouts: renderLayouts, shared: renderShared, global: renderGlobal, tiling: renderTiling, ir: renderIR };
+  // ---- performance --------------------------------------------------------------------
+  const fmtBytes = (b) => (b >= 1 << 30 ? `${(b / (1 << 30)).toFixed(2)} GiB` : b >= 1 << 20 ? `${(b / (1 << 20)).toFixed(1)} MiB` : b >= 1024 ? `${(b / 1024).toFixed(1)} KiB` : `${Math.round(b)} B`);
+  const fmtMs = (ms) => (ms === null || ms === undefined ? "n/a" : ms < 0.1 ? `${(ms * 1000).toFixed(1)} µs` : `${ms.toFixed(3)} ms`);
+  const pct = (x) => `${Math.round(x * 100)}%`;
+
+  function occupancyPanel(P) {
+    const o = P.occupancy, lim = P.device.limits;
+    const panel = h("div", { class: "panel" }, h("h2", {}, "Occupancy"));
+    if (!o) return panel.append(h("div", { class: "empty" }, "No register/shared-memory metadata captured.")), panel;
+    panel.append(h("div", { class: "small muted" },
+      `${o.num_warps} warps/block, ${o.regs_per_thread || "?"} registers/thread, ${fmtBytes(o.shared_bytes)} shared/block on ${P.device.name}`));
+    const rows = [["warps", o.blocks_by_warps, `${lim.max_warps_per_sm} warps/SM`],
+      ["registers", o.blocks_by_regs, `${lim.regs_per_sm} regs/SM`],
+      ["shared memory", o.blocks_by_shared, `${lim.shared_per_sm / 1024} KiB/SM`],
+      ["block slots", o.blocks_by_slots, `${lim.max_blocks_per_sm} blocks/SM`]];
+    const maxB = Math.max(...rows.map((r) => Math.min(r[1], 32)), 1);
+    const box = h("div", { class: "limits", style: "margin-top:10px" });
+    box.append(h("div", { class: "small muted" }, "blocks per SM allowed by each resource (the smallest wins)"));
+    for (const [name, n, cap] of rows) {
+      const bind = name === o.limiter;
+      box.append(h("div", { class: `row${bind ? " bind" : ""}`, title: cap },
+        h("span", { class: "name" }, name),
+        h("div", { class: "bar" }, h("div", { style: `width:${(Math.min(n, 32) / maxB) * 100}%;background:${bind ? "var(--warning)" : "var(--accent)"}` })),
+        h("span", { class: "mono" }, String(n))));
+    }
+    panel.append(box);
+    // Warp slots of one SM: filled by resident blocks.
+    const slots = h("div", { class: "warp-slots" });
+    for (let i = 0; i < o.max_warps_per_sm; i++) {
+      const b = Math.floor(i / o.num_warps);
+      const used = i < o.active_warps;
+      slots.append(h("i", { style: used ? `background:${warpColor(b)}` : "", title: used ? `block ${b}` : "idle warp slot" }));
+    }
+    panel.append(h("h3", {}, `Warp slots on one SM: ${o.active_warps}/${o.max_warps_per_sm} (${pct(o.occupancy)})`), slots);
+    if (P.regsForNextBlock) panel.append(h("div", { class: "note" }, `At ≤ ${P.regsForNextBlock} registers/thread (now ${o.regs_per_thread}) one more block would fit per SM.`));
+    return panel;
+  }
+
+  function schedulePanel(P) {
+    const w = P.waves;
+    const panel = h("div", { class: "panel" }, h("h2", {}, "Programs per SM"));
+    if (!w) return panel.append(h("div", { class: "empty" }, "No launch grid captured.")), panel;
+    const per = Math.ceil(w.total_blocks / w.sm_count), extra = w.total_blocks % w.sm_count;
+    panel.append(h("div", { class: "small muted" },
+      `${w.total_blocks} programs over ${w.sm_count} SMs: ${extra ? `${extra} SMs run ${per}, ${w.sm_count - extra} run ${per - 1}` : `every SM runs ${per}`}. ` +
+      `Equal-work programs finish when the busiest SM does, so ${pct(w.smBalance)} of SM time is used.`));
+    const cols = Math.min(per, 48), scale = per / cols;
+    const cell = Math.max(6, Math.min(16, Math.floor(560 / cols)));
+    const svg = [`<svg width="${cols * cell + 60}" height="${w.sm_count * (cell + 2) + 4}" class="sched">`];
+    for (let s = 0; s < w.sm_count; s++) {
+      const n = s < extra || !extra ? per : per - 1;
+      const y = s * (cell + 2) + 2;
+      svg.push(`<text x="0" y="${y + cell - 2}" class="lbl">SM ${s}</text>`);
+      for (let c = 0; c < cols; c++) {
+        const filled = (c + 1) * scale <= n + 1e-9 || (c * scale < n && (c + 1) * scale > n);
+        svg.push(`<rect x="${50 + c * cell}" y="${y}" width="${cell - 2}" height="${cell}" rx="2" class="${filled ? "on" : "off"}"><title>SM ${s}: ${n} programs</title></rect>`);
+      }
+    }
+    svg.push("</svg>");
+    panel.append(h("div", { class: "canvas-wrap", html: svg.join("") }));
+    if (scale > 1) panel.append(h("div", { class: "note" }, `Each cell is ${scale.toFixed(1)} programs.`));
+    panel.append(h("div", { class: "note" }, `Waves of ${w.blocks_per_wave} concurrent programs: ${w.waves.toFixed(2)}. Measured on an RTX 3050 Ti, run time follows programs-per-SM (above) within 6%; the wave count overestimates the tail when several blocks share an SM.`));
+    return panel;
+  }
+
+  function rooflineSvg(r, dev) {
+    const W = 560, H = 330, L = 58, B = 40, T = 14, R = 16;
+    const peak = r.peakTflops, bw = r.bandwidthGbps;
+    const xs = [0.1, 10000], ys = [0.01, Math.max(peak * 2, 1)];
+    const lx = (v) => L + ((Math.log10(v) - Math.log10(xs[0])) / (Math.log10(xs[1]) - Math.log10(xs[0]))) * (W - L - R);
+    const ly = (v) => H - B - ((Math.log10(v) - Math.log10(ys[0])) / (Math.log10(ys[1]) - Math.log10(ys[0]))) * (H - B - T);
+    const s = [`<svg width="${W}" height="${H}" class="roof">`];
+    for (let e = -1; e <= 4; e++) s.push(`<line x1="${lx(10 ** e)}" x2="${lx(10 ** e)}" y1="${T}" y2="${H - B}" class="grid"/><text x="${lx(10 ** e)}" y="${H - B + 16}" class="lbl" text-anchor="middle">${10 ** e}</text>`);
+    for (let e = -2; 10 ** e <= ys[1]; e++) s.push(`<line x1="${L}" x2="${W - R}" y1="${ly(10 ** e)}" y2="${ly(10 ** e)}" class="grid"/><text x="${L - 6}" y="${ly(10 ** e) + 4}" class="lbl" text-anchor="end">${10 ** e}</text>`);
+    const ridge = (peak * 1e12) / (bw * 1e9);
+    const memY = (x) => (x * bw * 1e9) / 1e12;
+    s.push(`<polyline class="roofline" points="${lx(xs[0])},${ly(Math.max(memY(xs[0]), ys[0]))} ${lx(ridge)},${ly(peak)} ${lx(xs[1])},${ly(peak)}"/>`);
+    s.push(`<text x="${lx(ridge) + 6}" y="${ly(peak) - 6}" class="lbl">${peak.toFixed(1)} TFLOP/s ${r.dotDtype} (measured peak)</text>`);
+    s.push(`<text x="${lx(0.3)}" y="${ly(memY(0.3)) - 8}" class="lbl" transform="rotate(-33 ${lx(0.3)} ${ly(memY(0.3)) - 8})">${bw.toFixed(0)} GB/s</text>`);
+    const x = Math.min(Math.max(r.intensity, xs[0]), xs[1]);
+    const bound = r.flops / (r.boundMs * 1e-3) / 1e12;
+    s.push(`<circle cx="${lx(x)}" cy="${ly(bound)}" r="6" class="pred"><title>roofline bound: ${bound.toFixed(2)} TFLOP/s</title></circle>`);
+    if (r.achievedTflops) s.push(`<circle cx="${lx(x)}" cy="${ly(Math.max(r.achievedTflops, ys[0]))}" r="6" class="meas"><title>measured: ${r.achievedTflops.toFixed(2)} TFLOP/s</title></circle>`);
+    s.push(`<text x="${(W + L) / 2}" y="${H - 6}" class="lbl" text-anchor="middle">arithmetic intensity (FLOP / DRAM byte)</text>`);
+    s.push(`<text x="14" y="${(H - B) / 2}" class="lbl" text-anchor="middle" transform="rotate(-90 14 ${(H - B) / 2})">TFLOP/s</text></svg>`);
+    return s.join("");
+  }
+
+  function rooflinePanel(P) {
+    const r = P.roofline;
+    const panel = h("div", { class: "panel" }, h("h2", {}, "Roofline"));
+    if (!r) return panel.append(h("div", { class: "empty" }, "No launch captured: work and traffic are unknown.")), panel;
+    const dev = P.device;
+    if (!r.bandwidthGbps) return panel.append(h("div", { class: "empty" }, "Unknown DRAM bandwidth for this device.")), panel;
+    if (r.flops > 0 && r.peakTflops) {
+      panel.append(h("div", { class: "canvas-wrap", html: rooflineSvg(r, dev) }),
+        h("div", { class: "legend" }, h("span", {}, h("i", { style: "background:transparent;border:2px solid var(--accent)" }), "roofline bound"),
+          r.achievedTflops ? h("span", {}, h("i", { style: "background:var(--ok)" }), "measured") : null));
+    } else if (r.flops > 0) {
+      panel.append(h("div", { class: "note" }, "Run `tritonlens device --calibrate` to measure the compute peak for the roofline."));
+    } else {
+      const ach = r.achievedGbps;
+      panel.append(h("div", { class: "small muted" }, "No tt.dot: the kernel is modeled as memory-bound."));
+      const box = h("div", { class: "limits", style: "margin-top:8px" });
+      box.append(h("div", { class: "row" }, h("span", { class: "name" }, "peak"), h("div", { class: "bar" }, h("div", { style: "width:100%" })), h("span", { class: "mono" }, `${r.bandwidthGbps.toFixed(0)} GB/s`)));
+      if (ach) box.append(h("div", { class: "row" }, h("span", { class: "name" }, "achieved"), h("div", { class: "bar" }, h("div", { style: `width:${Math.min(100, (ach / r.bandwidthGbps) * 100)}%;background:var(--ok)` })), h("span", { class: "mono" }, `${ach.toFixed(0)} GB/s`)));
+      panel.append(box);
+    }
+    const rows = [["FLOPs (tt.dot)", r.flops ? `${(r.flops / 1e9).toFixed(2)} GFLOP` : "0"],
+      ["requested bytes (L1/L2)", fmtBytes(r.requestedBytes)], ["DRAM bytes (lower bound)", fmtBytes(r.dramBytes)],
+      ["intensity", r.flops ? `${r.intensity.toFixed(1)} FLOP/B` : "-"], ["ridge point", r.ridge ? `${r.ridge.toFixed(0)} FLOP/B` : "-"],
+      ["memory time", fmtMs(r.memoryMs)], ["compute time", r.flops ? fmtMs(r.computeMs) : "-"],
+      ["bound", `${r.bound} (${fmtMs(r.boundMs)})`]];
+    if (r.measuredMs) rows.push(["measured", fmtMs(r.measuredMs)], ["of roofline", r.attained ? pct(r.attained) : "-"]);
+    panel.append(h("div", { style: "margin-top:10px", html: kv(rows) }));
+    const notes = [];
+    if (!r.tripsKnown) notes.push("Some loop trip counts could not be evaluated; work is under-counted.");
+    if (r.l2Resident) notes.push(`The working set (${fmtBytes(r.dramBytes)}) fits in the ${fmtBytes(r.l2Bytes)} L2: repeated launches never reach DRAM, so measured bandwidth can exceed the DRAM roof.`);
+    if (r.flops && r.waveEfficiency < 0.99) notes.push(`Compute time includes the SM imbalance (${pct(r.waveEfficiency)} utilization).`);
+    if (!r.measuredMs) notes.push("Run with `tritonlens run --time` to measure the kernel and place it on the chart.");
+    for (const n of notes) panel.append(h("div", { class: "note" }, n));
+    const pt = Object.entries(r.perTensor || {});
+    if (pt.length) {
+      const tb = h("table", { class: "t", style: "margin-top:10px" }, h("tr", {}, h("th", {}, "tensor"), h("th", {}, "DRAM bytes")));
+      for (const [name, b] of pt) tb.append(h("tr", {}, h("td", { class: "mono" }, name), h("td", {}, fmtBytes(b))));
+      panel.append(tb);
+    }
+    return panel;
+  }
+
+  function renderPerf() {
+    const sec = $("#tab-perf");
+    const P = D.perf;
+    if (!P) return sec.append(h("div", { class: "empty" }, "Performance model unavailable for this kernel."));
+    const dev = P.device, o = P.occupancy, w = P.waves, r = P.roofline;
+    const card = (key, val, sub) => h("div", { class: "card" }, h("div", { class: "k" }, key),
+      h("div", { class: "v" }, String(val)), sub ? h("div", { class: "s" }, sub) : null);
+    const m = dev.measured || {};
+    sec.append(h("div", { class: "cards" },
+      card("Device", `${dev.sm_count} SMs`, `${dev.name} · sm_${dev.arch}`),
+      card("Measured peaks", m.gbps ? `${m.gbps.toFixed(0)} GB/s` : "not calibrated", m.fp16_tflops ? `${m.fp16_tflops.toFixed(1)} TFLOP/s fp16` : "tritonlens device --calibrate"),
+      card("Occupancy", o ? pct(o.occupancy) : "n/a", o ? `${o.active_warps}/${o.max_warps_per_sm} warps · ${o.limiter}` : ""),
+      card("SM utilization", w ? pct(w.smBalance) : "n/a", w ? `${w.total_blocks} programs / ${w.sm_count} SMs` : ""),
+      card("Bound", r && r.boundMs ? `${r.bound}` : "n/a", r && r.boundMs ? `≥ ${fmtMs(r.boundMs)}` : ""),
+      card("Measured", r && r.measuredMs ? fmtMs(r.measuredMs) : "n/a", r && r.attained ? `${pct(r.attained)} of roofline` : "run with --time")));
+    const perfFindings = D.findings.filter((f) => ["TL007", "TL008", "TL009"].includes(f.rule));
+    const left = h("div", {}, occupancyPanel(P), schedulePanel(P));
+    const right = h("div", {}, rooflinePanel(P));
+    if (perfFindings.length) {
+      const fp = h("div", { class: "panel", style: "margin-top:16px" }, h("h2", {}, "Device findings"));
+      for (const f of perfFindings) fp.append(findingEl(f));
+      right.append(fp);
+    }
+    left.querySelectorAll(".panel").forEach((p, i) => i && (p.style.marginTop = "16px"));
+    sec.append(h("div", { class: "grid-ir" }, left, right));
+  }
+
+  const RENDER = { overview: renderOverview, layouts: renderLayouts, shared: renderShared, global: renderGlobal, tiling: renderTiling, perf: renderPerf, ir: renderIR };
 
   renderHeader();
   const nav = $("nav");

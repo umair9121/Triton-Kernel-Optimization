@@ -204,6 +204,13 @@ def _ops_json(an: Analysis) -> list[dict]:
     return out
 
 
+def _perf(an: Analysis) -> dict | None:
+    try:
+        return an.perf.to_json()
+    except Exception:  # the report must render even if the perf model cannot
+        return None
+
+
 def build_report(an: Analysis, findings: list[Finding] | None = None,
                  source_roots: list[Path] | None = None) -> dict[str, Any]:
     findings = run_lint(an) if findings is None else findings
@@ -255,6 +262,7 @@ def build_report(an: Analysis, findings: list[Finding] | None = None,
         "global": global_json,
         "findings": [f.to_json() for f in findings],
         "tiling": _tiling(an),
+        "perf": _perf(an),
         "ptx": an.ptx.to_json() if an.ptx else None,
         "ir": mod.text,
         "source": _find_source(an, roots),

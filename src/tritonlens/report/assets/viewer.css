@@ -141,3 +141,14 @@ pre.code .gut.info::before { content: "\25CF"; color: var(--info); }
 .empty { color: var(--muted); padding: 24px; text-align: center; }
 .row-flex { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
 .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+.warp-slots { display: grid; grid-template-columns: repeat(16, 18px); gap: 3px; }
+.warp-slots i { height: 14px; border-radius: 2px; background: var(--panel2);
+  border: 1px solid var(--border); }
+svg .lbl { fill: var(--muted); font-size: 11px; font-family: var(--mono); }
+svg.sched rect.on { fill: var(--accent); }
+svg.sched rect.off { fill: var(--panel2); stroke: var(--border); }
+svg.roof .grid { stroke: var(--border); stroke-width: 1; }
+svg.roof .roofline { fill: none; stroke: var(--warning); stroke-width: 2.5; }
+svg.roof .pred { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+svg.roof .meas { fill: var(--ok); }
