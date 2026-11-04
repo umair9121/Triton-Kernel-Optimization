@@ -4,6 +4,7 @@
     tritonlens analyze kernel.ttgir -o report.html          # analyze IR captured elsewhere
     tritonlens lint examples/softmax.py --format sarif      # CI-friendly findings
     tritonlens validate                                     # check layout models on this GPU
+    tritonlens device --calibrate                           # GPU limits + measured peaks
 """
 
 from __future__ import annotations
@@ -162,6 +163,17 @@ def cmd_validate(args) -> int:
     return 1 if failed else 0
 
 
+def cmd_device(args) -> int:
+    from . import device
+
+    spec = device.calibrate() if args.calibrate else device.detect()
+    if spec is None:
+        print("tritonlens: no CUDA device found", file=sys.stderr)
+        return 1
+    print(json.dumps(spec.to_json(), indent=2) if args.json else spec.describe())
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="tritonlens", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -195,6 +207,12 @@ def build_parser() -> argparse.ArgumentParser:
     val = sub.add_parser("validate", help="check the layout models against this GPU")
     val.add_argument("--quick", action="store_true")
     val.set_defaults(func=cmd_validate)
+
+    dev = sub.add_parser("device", help="show GPU limits and measured peaks")
+    dev.add_argument("--calibrate", action="store_true",
+                     help="measure bandwidth and matmul throughput and cache the result")
+    dev.add_argument("--json", action="store_true")
+    dev.set_defaults(func=cmd_device)
     return p
 
 
