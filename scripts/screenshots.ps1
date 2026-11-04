@@ -14,8 +14,9 @@ New-Item -ItemType Directory -Force $OutDir | Out-Null
 $out = (Resolve-Path $OutDir).Path
 if (-not $Prefix) { $Prefix = $Report }
 foreach ($tab in $Tabs) {
+    $name = $tab -replace ":", "_"
     & $edge --headless=new --disable-gpu --hide-scrollbars --window-size=1440,1000 `
-        --virtual-time-budget=3000 "--screenshot=$out\$Prefix`_$tab.png" `
+        --virtual-time-budget=3000 "--screenshot=$out\$Prefix`_$name.png" `
         "http://127.0.0.1:$Port/$Report.html#$tab" 2>$null
     Start-Sleep -Milliseconds 1500
 }

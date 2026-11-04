@@ -136,7 +136,7 @@
       rendered.add(name);
       RENDER[name]();
     }
-    location.hash = name;
+    if (location.hash.slice(1).split(":")[0] !== name) history.replaceState(null, "", "#" + name);
   }
 
   // ---- overview -----------------------------------------------------------------------
@@ -760,6 +760,13 @@
   renderHeader();
   const nav = $("nav");
   for (const [id, label] of TABS) nav.append(h("button", { "data-tab": id, onclick: () => showTab(id) }, label));
-  const initial = (location.hash || "").slice(1);
+  // Deep links: #layouts:2 selects the third tensor, #shared:4 the fifth access, #global:1 ...
+  const [initial, sel] = (location.hash || "").slice(1).split(":");
+  const idx = sel === undefined ? NaN : Number(sel);
+  if (!Number.isNaN(idx)) {
+    if (initial === "layouts" && D.tensors[idx]) L.key = D.tensors[idx].key;
+    if (initial === "shared" && D.shared.accesses[idx]) S.access = idx;
+    if (initial === "global" && D.global[idx]) G.idx = idx;
+  }
   showTab(TABS.some(([id]) => id === initial) ? initial : "overview");
 })();
