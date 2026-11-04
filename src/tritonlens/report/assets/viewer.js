@@ -447,10 +447,10 @@
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const bank = buf.banks[r][c];
-        let color = bankColor(bank);
-        if (instr && !touched.has(r * cols + c)) color = shade(color, -0.6);
-        ctx.fillStyle = color;
+        ctx.globalAlpha = instr && !touched.has(r * cols + c) ? 0.3 : 1;
+        ctx.fillStyle = bankColor(bank);
         ctx.fillRect(c * g.cell + 1, r * g.cell + 1, g.cell - (g.cell > 5 ? 1 : 0), g.cell - (g.cell > 5 ? 1 : 0));
+        ctx.globalAlpha = 1;
         if (g.cell >= 16) {
           ctx.fillStyle = "rgba(255,255,255,.8)";
           ctx.font = `${Math.floor(g.cell * 0.42)}px Consolas, monospace`;
