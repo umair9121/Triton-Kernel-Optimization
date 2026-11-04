@@ -194,7 +194,7 @@ def rule_tl001(an: Analysis) -> list[Finding]:
         msg = (f"{_what(acc).capitalize()} uses {acc.vec_bytes}-byte accesses per lane; "
                f"{acc.potential_vec * acc.elem_bytes}-byte vectors are possible. Limited by: "
                + "; ".join(reasons) + "." + _ptx_note(acc))
-        out.append(Finding("TL001", severity, msg, acc.op, " ".join(dict.fromkeys(fixes)),
+        out.append(Finding("TL001", severity, msg, acc.op, "; ".join(dict.fromkeys(fixes)),
                            {"vecBytes": acc.vec_bytes,
                             "potentialBytes": acc.potential_vec * acc.elem_bytes,
                             "limits": sorted(binding)}))
