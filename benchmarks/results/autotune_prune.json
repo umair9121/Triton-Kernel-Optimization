@@ -1,0 +1,71 @@
+{
+  "device": "NVIDIA GeForce RTX 3050 Ti Laptop GPU",
+  "rows": [
+    {
+      "size": 640,
+      "prune": false,
+      "configs": 108,
+      "benchmarked": 108,
+      "failed": 26,
+      "tuneSeconds": 204.01378679997288,
+      "bestConfig": "64x64x32 w4 s3",
+      "bestMs": 0.07553960382938385,
+      "tflops": 6.940571215917063
+    },
+    {
+      "size": 640,
+      "prune": true,
+      "configs": 108,
+      "benchmarked": 68,
+      "failed": 0,
+      "tuneSeconds": 59.976381800021045,
+      "bestConfig": "64x64x32 w4 s3",
+      "bestMs": 0.0748823881149292,
+      "tflops": 7.001486106390261
+    },
+    {
+      "size": 1024,
+      "prune": false,
+      "configs": 108,
+      "benchmarked": 108,
+      "failed": 26,
+      "tuneSeconds": 203.90643260010984,
+      "bestConfig": "64x64x32 w4 s3",
+      "bestMs": 0.2913413643836975,
+      "tflops": 7.371022142848748
+    },
+    {
+      "size": 1024,
+      "prune": true,
+      "configs": 108,
+      "benchmarked": 82,
+      "failed": 0,
+      "tuneSeconds": 105.25234320003074,
+      "bestConfig": "64x64x32 w4 s3",
+      "bestMs": 0.2916356325149536,
+      "tflops": 7.3635845849182635
+    },
+    {
+      "size": 2048,
+      "prune": false,
+      "configs": 108,
+      "benchmarked": 108,
+      "failed": 26,
+      "tuneSeconds": 209.25147509993985,
+      "bestConfig": "64x64x32 w4 s4",
+      "bestMs": 2.262488603591919,
+      "tflops": 7.593350594882687
+    },
+    {
+      "size": 2048,
+      "prune": true,
+      "configs": 108,
+      "benchmarked": 82,
+      "failed": 0,
+      "tuneSeconds": 110.74105960002635,
+      "bestConfig": "64x64x32 w4 s4",
+      "bestMs": 2.272193431854248,
+      "tflops": 7.560918424968856
+    }
+  ]
+}
