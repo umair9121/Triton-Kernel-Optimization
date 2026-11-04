@@ -1,0 +1,104 @@
+{
+  "device": "NVIDIA GeForce RTX 3050 Ti Laptop GPU",
+  "rows": [
+    {
+      "case": "vector add, 16M fp32",
+      "variant": "offset views + odd n (TL001, TL006)",
+      "ms": 1.1724069118499756,
+      "gbps": 171.72074811664217,
+      "kernel": "add_kernel",
+      "vec_bytes": 4,
+      "ptx_bytes": 4,
+      "efficiency": 1.0,
+      "rules": [
+        "TL001 (info)",
+        "TL006 (info)",
+        "TL006 (warning)"
+      ]
+    },
+    {
+      "case": "vector add, 16M fp32",
+      "variant": "aligned tensors, n % 16 == 0",
+      "ms": 1.1585867404937744,
+      "gbps": 173.7691145284446,
+      "kernel": "add_kernel",
+      "vec_bytes": 16,
+      "ptx_bytes": 16,
+      "efficiency": 1.0,
+      "rules": []
+    },
+    {
+      "case": "softmax, 8192 rows fp32",
+      "variant": "781 columns (TL001)",
+      "ms": 0.313753604888916,
+      "gbps": 163.1331567269848,
+      "kernel": "softmax_kernel",
+      "vec_bytes": 4,
+      "ptx_bytes": 4,
+      "efficiency": 1.0,
+      "rules": [
+        "TL001 (info)",
+        "TL006 (info)"
+      ]
+    },
+    {
+      "case": "softmax, 8192 rows fp32",
+      "variant": "784 columns (padded to 16)",
+      "ms": 0.29461413621902466,
+      "gbps": 174.39836614561648,
+      "kernel": "softmax_kernel",
+      "vec_bytes": 16,
+      "ptx_bytes": 16,
+      "efficiency": 1.0,
+      "rules": []
+    },
+    {
+      "case": "layernorm, 4096x8192 fp16",
+      "variant": "BLOCK=1024, 8 warps (TL001 info)",
+      "ms": 1.225376844406128,
+      "gbps": 164.29769578155512,
+      "kernel": "layernorm_kernel",
+      "vec_bytes": 8,
+      "ptx_bytes": 8,
+      "efficiency": 1.0,
+      "rules": [
+        "TL001 (info)"
+      ]
+    },
+    {
+      "case": "layernorm, 4096x8192 fp16",
+      "variant": "BLOCK=2048, 8 warps",
+      "ms": 1.2720420360565186,
+      "gbps": 158.27039224594836,
+      "kernel": "layernorm_kernel",
+      "vec_bytes": 16,
+      "ptx_bytes": 16,
+      "efficiency": 1.0,
+      "rules": []
+    },
+    {
+      "case": "gather 4M fp32",
+      "variant": "stride 8 (TL002)",
+      "ms": 0.8691321611404419,
+      "gbps": 38.606823565211485,
+      "kernel": "strided_gather_kernel",
+      "vec_bytes": 4,
+      "ptx_bytes": 4,
+      "efficiency": 0.125,
+      "rules": [
+        "TL002 (error)"
+      ]
+    },
+    {
+      "case": "gather 4M fp32",
+      "variant": "stride 1",
+      "ms": 0.2015867531299591,
+      "gbps": 166.45157223385658,
+      "kernel": "strided_gather_kernel",
+      "vec_bytes": 16,
+      "ptx_bytes": 16,
+      "efficiency": 1.0,
+      "rules": []
+    }
+  ]
+}
