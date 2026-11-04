@@ -1,0 +1,29 @@
+﻿probe                  layout      elements  repl mismatch  result
+2d 64x64 w4            blocked         4096     1        0  PASS
+2d 64x64 w4 T          blocked         4096     1        0  PASS
+2d 32x32 w4            blocked         1024     1        0  PASS
+2d 32x32 w4 T          blocked         1024     1        0  PASS
+2d 16x128 w4           blocked         2048     1        0  PASS
+2d 16x128 w4 T         blocked         2048     1        0  PASS
+2d 128x16 w8           blocked         2048     1        0  PASS
+2d 128x16 w8 T         blocked         2048     1        0  PASS
+2d 64x4 w2             blocked          256     1        0  PASS
+2d 64x4 w2 T           blocked          256     1        0  PASS
+2d 8x8 w1              blocked           64     1        0  PASS
+2d 8x8 w1 T            blocked           64     1        0  PASS
+2d 256x32 w8           blocked         8192     1        0  PASS
+2d 256x32 w8 T         blocked         8192     1        0  PASS
+2d 32x64 w1            blocked         2048     1        0  PASS
+2d 32x64 w1 T          blocked         2048     1        0  PASS
+1d 1024 w4             blocked         1024     1        0  PASS
+1d 128 w4              blocked          128     1        0  PASS
+1d 32 w4               blocked           32     4        0  PASS
+1d 4096 w8             blocked         4096     1        0  PASS
+slice 64x64 w4         slice             64    16        0  PASS
+slice 32x128 w4        slice             32    32        0  PASS
+mma 64x64x32 w4        nvidia_mma      4096     1        0  PASS
+mma 32x32x16 w4        nvidia_mma      1024     1        0  PASS
+mma 128x64x32 w8       nvidia_mma      8192     1        0  PASS
+mma 16x16x16 w1        nvidia_mma       256     1        0  PASS
+
+26/26 probes match the GPU
