@@ -332,6 +332,26 @@ def rule_tl006(an: Analysis) -> list[Finding]:
 ALL_RULES = [rule_tl001, rule_tl002, rule_tl003, rule_tl004, rule_tl005, rule_tl006]
 
 
+def _dedupe(findings: list[Finding]) -> list[Finding]:
+    """Merge identical findings at the same source location.
+
+    Software pipelining clones loads (prologue plus loop body), which would otherwise report
+    the same problem several times for one line of Python.
+    """
+    merged: dict[tuple, Finding] = {}
+    for f in findings:
+        key = (f.rule, f.severity, f.message, f.location)
+        if key in merged and f.location:
+            merged[key].data["occurrences"] = merged[key].data.get("occurrences", 1) + 1
+        else:
+            merged.setdefault(key if f.location else (id(f),), f)
+    out = list(merged.values())
+    for f in out:
+        if f.data.get("occurrences", 1) > 1:
+            f.message += f" ({f.data['occurrences']} IR ops: the pipeliner duplicated this access.)"
+    return out
+
+
 def run_lint(an: Analysis) -> list[Finding]:
     findings: list[Finding] = []
     for rule in ALL_RULES:
@@ -339,6 +359,7 @@ def run_lint(an: Analysis) -> list[Finding]:
             findings.extend(rule(an))
         except (UnsupportedLayout, KeyError, IndexError, AttributeError):
             continue
+    findings = _dedupe(findings)
     findings.sort(key=lambda f: (SEVERITY_ORDER.get(f.severity, 9),
                                  f.op.line_no if f.op else 0, f.rule))
     return findings
