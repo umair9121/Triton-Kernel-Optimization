@@ -9,6 +9,7 @@ from .analysis import banks, coalescing
 from .analysis.axis import AxisAnalysis
 from .analysis.ptx import PtxStats, parse_ptx
 from .capture import ArgInfo, CapturedKernel
+from .device import DeviceSpec, for_target
 from .ir import Module, parse_module
 
 
@@ -24,10 +25,21 @@ class Analysis:
     arg_values: dict[str, int] = field(default_factory=dict)  # %argN -> int value
     launch: CapturedKernel | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    device: DeviceSpec | None = None
+    _perf: Any = field(default=None, repr=False)
 
     @property
     def func(self):
         return self.module.func
+
+    @property
+    def perf(self):
+        """Occupancy, waves and roofline on :attr:`device` (computed on first use)."""
+        if self._perf is None:
+            from .analysis.perf import analyze_performance
+
+            self._perf = analyze_performance(self)
+        return self._perf
 
     def pretty(self, name: str) -> str:
         """Python-level name for an IR value name such as ``%arg3``."""
@@ -56,7 +68,7 @@ def map_arguments(module: Module, args: list[ArgInfo]) -> tuple[dict[str, str], 
 
 
 def analyze(ttgir: str, ptx: str | None = None, launch: CapturedKernel | None = None,
-            name: str | None = None) -> Analysis:
+            name: str | None = None, device: DeviceSpec | None = None) -> Analysis:
     module = parse_module(ttgir)
     arg_names, arg_values = ({}, {})
     if launch is not None and launch.args:
@@ -71,8 +83,10 @@ def analyze(ttgir: str, ptx: str | None = None, launch: CapturedKernel | None = 
         module=module, ptx=ptx_stats, axis=axis, global_accesses=global_acc,
         shared_accesses=shared_acc, arg_names=arg_names, arg_values=arg_values, launch=launch,
         metadata=dict(launch.metadata) if launch else {},
+        device=device or for_target(module.target, (launch.metadata.get("device")
+                                                    if launch else None)),
     )
 
 
-def analyze_captured(kernel: CapturedKernel) -> Analysis:
-    return analyze(kernel.ttgir, kernel.ir.get("ptx"), kernel)
+def analyze_captured(kernel: CapturedKernel, device: DeviceSpec | None = None) -> Analysis:
+    return analyze(kernel.ttgir, kernel.ir.get("ptx"), kernel, device=device)

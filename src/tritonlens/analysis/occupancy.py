@@ -82,8 +82,16 @@ class Waves:
     busy_sms: int  # SMs that receive at least one block
     sm_count: int
 
+    @property
+    def sm_balance(self) -> float:
+        """Average / maximum blocks per SM: idle SM time if every SM runs at full throughput
+        regardless of how many blocks it holds (the wave model is pessimistic when several
+        blocks share an SM)."""
+        per_sm = -(-self.total_blocks // self.sm_count)
+        return self.total_blocks / (per_sm * self.sm_count)
+
     def to_json(self) -> dict:
-        return asdict(self)
+        return {**asdict(self), "smBalance": self.sm_balance}
 
 
 def waves(device: DeviceSpec, occ: Occupancy, grid: list[int] | None) -> Waves | None:

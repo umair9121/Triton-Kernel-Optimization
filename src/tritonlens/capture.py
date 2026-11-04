@@ -131,6 +131,13 @@ def _metadata_dict(compiled) -> dict[str, Any]:
         value = getattr(compiled, attr, None)
         if isinstance(value, int):
             out[attr] = value
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            out["device"] = torch.cuda.get_device_name()
+    except ImportError:
+        pass
     return out
 
 
@@ -199,13 +206,33 @@ def _resolve_grid(grid, bound: dict[str, Any], kwargs: dict[str, Any]) -> list[i
     return [int(g) for g in grid]
 
 
+def time_launch(launch) -> float:
+    """Median kernel time in ms for ``launch()``.
+
+    Replays inside a CUDA graph when possible so that Python launch overhead (tens of
+    microseconds on Windows) does not swamp small kernels.
+    """
+    import torch
+    from triton.testing import do_bench, do_bench_cudagraph
+
+    torch.cuda.synchronize()
+    try:
+        return float(do_bench_cudagraph(launch, rep=50, return_mode="median"))
+    except Exception:
+        return float(do_bench(launch, warmup=10, rep=50, return_mode="median"))
+
+
 class Recorder:
     """Collects one :class:`CapturedKernel` per unique compiled kernel."""
 
-    def __init__(self) -> None:
+    def __init__(self, time: bool = False) -> None:
         self.kernels: dict[str, CapturedKernel] = {}
+        self.time = time
 
-    def record(self, jit_fn, compiled, args, kwargs, grid) -> None:
+    def is_new(self, compiled) -> bool:
+        return compiled is not None and str(getattr(compiled, "hash", "")) not in self.kernels
+
+    def record(self, jit_fn, compiled, args, kwargs, grid, launch=None) -> None:
         if compiled is None or not hasattr(compiled, "asm"):
             return
         key = str(compiled.hash)
@@ -219,6 +246,11 @@ class Recorder:
         constexpr_names = {p.name for p in jit_fn.params if p.is_constexpr}
         arg_infos = [describe_arg(n, v, n in constexpr_names) for n, v in bound.items()]
         captured = from_compiled(compiled, _resolve_grid(grid, bound, kwargs), arg_infos)
+        if self.time and launch is not None and grid is not None:
+            try:
+                captured.metadata["time_ms"] = time_launch(launch)
+            except Exception as exc:
+                print(f"[tritonlens] timing failed for {captured.name}: {exc}", file=sys.stderr)
         self.kernels[key] = captured
 
     def __iter__(self):
@@ -229,8 +261,12 @@ class Recorder:
 
 
 @contextlib.contextmanager
-def capturing():
+def capturing(time: bool = False):
     """Context manager that records every Triton kernel launched inside it.
+
+    With ``time=True`` the first launch of each kernel is replayed to measure its run time.
+    Replays repeat the kernel's side effects, so do not time kernels that update their inputs
+    in place (e.g. ``x += y``) if the script checks results afterwards.
 
     >>> with capturing() as rec:
     ...     add_kernel[grid](x, y, out, n, BLOCK_SIZE=1024)
@@ -238,13 +274,17 @@ def capturing():
     """
     from triton.runtime.jit import JITFunction
 
-    recorder = Recorder()
+    recorder = Recorder(time=time)
     original_run = JITFunction.run
 
     def run(self, *args, grid, warmup, **kwargs):
         compiled = original_run(self, *args, grid=grid, warmup=warmup, **kwargs)
         try:
-            recorder.record(self, compiled, args, kwargs, None if warmup else grid)
+            launch = None
+            if recorder.time and not warmup and recorder.is_new(compiled):
+                def launch(self=self, args=args, grid=grid, kwargs=kwargs):
+                    original_run(self, *args, grid=grid, warmup=False, **kwargs)
+            recorder.record(self, compiled, args, kwargs, None if warmup else grid, launch)
         except Exception as exc:  # capture must never break the user's program
             print(f"[tritonlens] capture failed for {self.__name__}: {exc}", file=sys.stderr)
         return compiled
@@ -256,7 +296,8 @@ def capturing():
         JITFunction.run = original_run
 
 
-def capture_script(script: str | Path, argv: list[str] | None = None) -> list[CapturedKernel]:
+def capture_script(script: str | Path, argv: list[str] | None = None,
+                   time: bool = False) -> list[CapturedKernel]:
     """Run a Python script in-process and return every kernel it launched."""
     script = str(Path(script).resolve())
     old_argv = sys.argv
@@ -264,7 +305,7 @@ def capture_script(script: str | Path, argv: list[str] | None = None) -> list[Ca
     sys.argv = [script, *(argv or [])]
     sys.path.insert(0, str(Path(script).parent))
     try:
-        with capturing() as recorder:
+        with capturing(time=time) as recorder:
             runpy.run_path(script, run_name="__main__")
     finally:
         sys.argv = old_argv
