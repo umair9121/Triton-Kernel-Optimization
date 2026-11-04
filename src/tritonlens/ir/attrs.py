@@ -14,7 +14,9 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-DIALECT_PREFIXES = ("triton_gpu.", "ttg.", "triton_nvidia_gpu.", "ttng.", "triton_amdgpu.", "amdgpu.")
+DIALECT_PREFIXES = (
+    "triton_gpu.", "ttg.", "triton_nvidia_gpu.", "ttng.", "triton_amdgpu.", "amdgpu.",
+)
 
 # Newer Triton releases renamed some encodings; map them to the 3.2 names used internally.
 KIND_ALIASES = {

@@ -13,6 +13,7 @@ from .analysis.lint import RULES, Finding
 _COLORS = {"error": "\033[31m", "warning": "\033[33m", "info": "\033[36m"}
 _RESET = "\033[0m"
 _SARIF_LEVEL = {"error": "error", "warning": "warning", "info": "note"}
+REPO_URL = "https://github.com/umair9121/Triton-Kernel-Optimization"
 
 
 def _use_color(stream) -> bool:
@@ -39,7 +40,7 @@ def to_json(results: dict[str, list[Finding]]) -> str:
 def to_sarif(results: dict[str, list[Finding]]) -> dict:
     """SARIF 2.1.0, suitable for GitHub code scanning uploads."""
     rules = [{"id": rid, "name": title.replace(" ", ""), "shortDescription": {"text": title},
-              "helpUri": "https://github.com/umair9121/Triton-Kernel-Optimization#lint-rules"}
+              "helpUri": f"{REPO_URL}#lint-rules"}
              for rid, title in RULES.items()]
     sarif_results = []
     for kernel, findings in results.items():
@@ -47,7 +48,8 @@ def to_sarif(results: dict[str, list[Finding]]) -> dict:
             res = {
                 "ruleId": f.rule,
                 "level": _SARIF_LEVEL.get(f.severity, "note"),
-                "message": {"text": f"[{kernel}] {f.message}" + (f" Fix: {f.fix}" if f.fix else "")},
+                "message": {"text": f"[{kernel}] {f.message}"
+                                    + (f" Fix: {f.fix}" if f.fix else "")},
                 "properties": {"kernel": kernel, **{k: v for k, v in f.data.items()
                                                     if isinstance(v, (int, float, str))}},
             }
@@ -63,7 +65,7 @@ def to_sarif(results: dict[str, list[Finding]]) -> dict:
         "version": "2.1.0",
         "runs": [{
             "tool": {"driver": {"name": "tritonlens", "version": __version__,
-                                "informationUri": "https://github.com/umair9121/Triton-Kernel-Optimization",
+                                "informationUri": REPO_URL,
                                 "rules": rules}},
             "results": sarif_results,
         }],

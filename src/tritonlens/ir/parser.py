@@ -11,7 +11,15 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .attrs import Encoding, parse_attr_dict, parse_encoding
-from .types import MemDescType, PointerType, ScalarType, TensorType, Type, parse_type, split_top_level
+from .types import (
+    MemDescType,
+    PointerType,
+    ScalarType,
+    TensorType,
+    Type,
+    parse_type,
+    split_top_level,
+)
 
 _ALIAS_RE = re.compile(r"^#(\w+)\s*=\s*(.*)$")
 _LOC_SUFFIX_RE = re.compile(r"\s+loc\((#\w+|\".*?\"(?::\d+:\d+)?|unknown)\)\s*$")
@@ -458,7 +466,8 @@ class _FuncBuilder:
             val = self.scope.lookup(name)
             if val is not None:
                 op.operands.append(val)
-        op.words = re.findall(r"(?<![%#\w.])([a-z][a-z_]*)(?![\w.(])", re.sub(r"\w+\s*=\s*[\w.]+", "", operand_part))
+        bare = re.sub(r"\w+\s*=\s*[\w.]+", "", operand_part)
+        op.words = re.findall(r"(?<![%#\w.])([a-z][a-z_]*)(?![\w.(])", bare)
         if op.is_("constant"):
             m = re.match(r"\s*(dense<(.*?)>|[-\w.+]+)", operand_part)
             if m:

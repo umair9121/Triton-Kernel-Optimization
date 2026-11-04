@@ -13,7 +13,9 @@ def test_parse_blocked_encoding_inline():
 
 
 def test_new_dialect_prefix_is_accepted():
-    enc = parse_encoding("#ttg.swizzled_shared<{vec = 8, perPhase = 1, maxPhase = 8, order = [1, 0]}>")
+    enc = parse_encoding(
+        "#ttg.swizzled_shared<{vec = 8, perPhase = 1, maxPhase = 8, order = [1, 0]}>"
+    )
     assert enc.kind == "shared"
     assert enc.params["maxPhase"] == 8
 

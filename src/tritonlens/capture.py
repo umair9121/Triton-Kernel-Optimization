@@ -281,6 +281,9 @@ def load_dump_dir(dump_dir: str | Path) -> list[CapturedKernel]:
         if (folder / "launch.json").exists():
             kernels.append(CapturedKernel.load(folder))
             continue
+        if (folder / f"{ttgir.stem}.launch.json").exists():
+            kernels.append(CapturedKernel.from_files(ttgir))
+            continue
         ir = {}
         for stage in IR_STAGES:
             candidate = folder / f"{ttgir.stem}.{stage}"

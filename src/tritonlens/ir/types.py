@@ -148,7 +148,8 @@ def parse_type(text: str, aliases: dict[str, Encoding] | None = None) -> Type:
     if m:
         parts = split_top_level(m.group(1))
         shape, elem_text = _shape_and_element(parts[0])
-        enc = parse_encoding(parts[1], aliases) if len(parts) > 1 and parts[1].startswith("#") else None
+        has_enc = len(parts) > 1 and parts[1].startswith("#")
+        enc = parse_encoding(parts[1], aliases) if has_enc else None
         space = parts[2] if len(parts) > 2 else ""
         return MemDescType(text=text, shape=shape, element=parse_type(elem_text, aliases),
                            encoding=enc, memory_space=space, mutable="mutable" in parts[2:])

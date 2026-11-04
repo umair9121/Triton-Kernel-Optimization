@@ -72,7 +72,8 @@ def _write_reports(results, out_dir: Path, save_ir: bool) -> list[Path]:
 def _write_index(results, pages: list[Path], path: Path) -> None:
     rows = []
     for (an, findings), page in zip(results, pages):
-        counts = {s: sum(1 for f in findings if f.severity == s) for s in ("error", "warning", "info")}
+        counts = {s: sum(1 for f in findings if f.severity == s)
+                  for s in ("error", "warning", "info")}
         badges = " ".join(f'<span class="b {s}">{n} {s}</span>' for s, n in counts.items() if n) \
             or '<span class="b ok">clean</span>'
         grid = "x".join(map(str, an.launch.grid)) if an.launch and an.launch.grid else "-"
@@ -128,7 +129,8 @@ def cmd_lint(args) -> int:
     results = _analyze_all(_load_kernels(Path(args.target), args.script_args))
     by_kernel: dict[str, list[Finding]] = {}
     for an, findings in results:
-        keep = [f for f in findings if SEVERITY_ORDER[f.severity] <= SEVERITY_ORDER[args.min_severity]]
+        limit = SEVERITY_ORDER[args.min_severity]
+        keep = [f for f in findings if SEVERITY_ORDER[f.severity] <= limit]
         by_kernel.setdefault(an.name, []).extend(keep)
     if args.format == "json":
         text = to_json(by_kernel)
@@ -176,7 +178,8 @@ def build_parser() -> argparse.ArgumentParser:
     an.add_argument("target")
     an.add_argument("-o", "--output", default="report.html", help="HTML file or directory")
     an.add_argument("--ptx", help="PTX for vector-width cross-checks (default: <stem>.ptx)")
-    an.add_argument("--launch", help="launch JSON with grid/arguments (default: <stem>.launch.json)")
+    an.add_argument("--launch",
+                    help="launch JSON with grid/arguments (default: <stem>.launch.json)")
     an.add_argument("--json", help="also write the raw report JSON here")
     an.set_defaults(func=cmd_analyze)
 
