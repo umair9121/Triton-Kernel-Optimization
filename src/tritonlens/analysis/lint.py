@@ -303,7 +303,26 @@ def rule_tl005(an: Analysis) -> list[Finding]:
     return out
 
 
-ALL_RULES = [rule_tl001, rule_tl002, rule_tl003, rule_tl004, rule_tl005]
+def rule_tl006(an: Analysis) -> list[Finding]:
+    from .runtime_check import check_args
+
+    if an.launch is None:
+        return []
+    # Only integers that reach an address or a mask matter for vectorization.
+    used: set[str] = set()
+    for acc in an.global_accesses:
+        for val in acc.op.operands:
+            used.update(an.arg_names.get(a.name, a.name) for a in feeding_args(val))
+    findings = []
+    for f in check_args(an.launch.args, an.launch.name):
+        arg = f.data.get("arg")
+        if "value" in f.data and an.arg_names and arg not in used:
+            continue
+        findings.append(f)
+    return findings
+
+
+ALL_RULES = [rule_tl001, rule_tl002, rule_tl003, rule_tl004, rule_tl005, rule_tl006]
 
 
 def run_lint(an: Analysis) -> list[Finding]:
